@@ -1,6 +1,9 @@
 // lib/services/lead_agent_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
 import 'invoice_service.dart';
+
+final _logger = Logger();
 
 class LeadAgentService {
   final supabase = Supabase.instance.client;
@@ -25,9 +28,9 @@ class LeadAgentService {
         });
       }
 
-      print('✅ Created ${leads.length} follow-up reminders');
+      _logger.i('✅ Created ${leads.length} follow-up reminders');
     } catch (e) {
-      print('❌ Error creating follow-up reminders: $e');
+      _logger.e('❌ Error creating follow-up reminders: $e');
     }
   }
 

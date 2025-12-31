@@ -1,6 +1,7 @@
 // lib/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'job_list_page.dart';
 import 'pricing_page.dart';
@@ -12,6 +13,8 @@ import 'client_list_page.dart';
 import 'lead_import_page.dart';
 import 'performance_page.dart';
 import 'services/lead_agent_service.dart';
+
+final _logger = Logger();
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,13 +47,13 @@ class _HomePageState extends State<HomePage> {
       
       // Run once per day at 9 AM or later
       if (lastRun != todayKey && today.hour >= 9) {
-        print('🤖 Running daily automation tasks...');
+        _logger.d('🤖 Running daily automation tasks...');
         await LeadAgentService().runDailyTasks();
         await prefs.setString('last_automation_run', todayKey);
-        print('✅ Automation complete');
+        _logger.i('✅ Automation complete');
       }
     } catch (e) {
-      print('❌ Automation error: $e');
+      _logger.e('❌ Automation error: $e');
     }
   }
 
@@ -74,7 +77,7 @@ class _HomePageState extends State<HomePage> {
         businessType = userPrefs?['business_type'];
       } catch (e) {
         // Column might not exist yet, default to null
-        print('Could not fetch business_type: $e');
+        _logger.e('Could not fetch business_type: $e');
         businessType = null;
       }
 
@@ -132,7 +135,7 @@ class _HomePageState extends State<HomePage> {
         }
       }
     } catch (e) {
-      print('Subscription check error: $e');
+      _logger.e('Subscription check error: $e');
     }
     if (mounted) setState(() => _loading = false);
   }

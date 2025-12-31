@@ -1,0 +1,101 @@
+Analyzing aura_crm...                                           
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\aura_chat_page.dart:245:39 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\client_list_page.dart:73:29 - use_build_context_synchronously
+   info - Don't invoke 'print' in production code - lib\core\env_loader.dart:38:7 - avoid_print
+warning - Unused import: 'app_theme.dart' - lib\dashboard_page.dart:3:8 - unused_import
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\dashboard_page.dart:88:51 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\dashboard_page.dart:171:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\dashboard_page.dart:196:39 - deprecated_member_use
+warning - The declaration '_getTechnicianEmail' isn't referenced - lib\dispatch_page.dart:109:10 - unused_element
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\expense_list_page.dart:128:42 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\expense_list_page.dart:143:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\inventory_page.dart:77:29 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\inventory_page.dart:182:29 - use_build_context_synchronously
+   info - Unnecessary escape in string literal - lib\invoice_list_page.dart:193:44 - unnecessary_string_escapes
+   info - Don't use 'BuildContext's across async gaps - lib\invoice_list_page.dart:200:31 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\invoice_list_page.dart:204:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\invoice_list_page.dart:210:40 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\invoice_list_page.dart:336:58 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\invoice_personalization_page.dart:321:51 - deprecated_member_use
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\invoice_personalization_page.dart:462:11 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\invoice_personalization_page.dart:463:11 - deprecated_member_use
+warning - Duplicate import - lib\job_detail_page.dart:5:8 - duplicate_import
+   info - Don't use 'BuildContext's across async gaps - lib\job_detail_page.dart:64:7 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\job_detail_page.dart:102:29 - use_build_context_synchronously
+warning - The value of the local variable 'org' isn't used - lib\job_detail_page.dart:118:13 - unused_local_variable
+   info - Don't invoke 'print' in production code - lib\job_list_page.dart:46:9 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\job_list_page.dart:150:39 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\job_list_page.dart:222:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\job_list_page.dart:231:66 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps - lib\job_list_page.dart:310:29 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:211:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:224:46 - deprecated_member_use
+warning - The declaration '_HeroSection' isn't referenced - lib\landing_page.dart:254:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:283:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:302:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:420:39 - deprecated_member_use
+warning - The declaration '_PainPoints' isn't referenced - lib\landing_page.dart:444:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:499:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:511:59 - deprecated_member_use
+warning - The declaration '_Features' isn't referenced - lib\landing_page.dart:551:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:607:49 - deprecated_member_use
+warning - The declaration '_SocialProof' isn't referenced - lib\landing_page.dart:653:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:733:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:748:32 - deprecated_member_use
+warning - The declaration '_FinalCTA' isn't referenced - lib\landing_page.dart:782:7 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page.dart:797:33 - deprecated_member_use
+warning - The declaration '_Footer' isn't referenced - lib\landing_page.dart:843:7 - unused_element
+   info - Empty catch block - lib\main.dart:10:15 - empty_catches
+   info - Empty catch block - lib\main.dart:17:15 - empty_catches
+   info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\onboarding_survey.dart:157:13 - deprecated_member_use
+   info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\onboarding_survey.dart:158:13 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\services\aura_ai_service.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\invoice_service.dart:47:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\invoice_service.dart:59:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\lead_agent_service.dart:58:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\lead_agent_service.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\lead_agent_service.dart:75:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\lead_agent_service.dart:81:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\lead_agent_service.dart:89:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:64:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:114:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:117:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:153:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:156:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:224:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:227:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:231:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:250:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:252:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:271:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\quickbooks_service.dart:296:7 - avoid_print
+warning - Unused import: 'dart:convert' - lib\services\whatsapp_service.dart:3:8 - unused_import
+warning - Unused import: 'package:http/http.dart' - lib\services\whatsapp_service.dart:4:8 - unused_import
+warning - Unused import: 'package:supabase_flutter/supabase_flutter.dart' - lib\services\whatsapp_service.dart:6:8 - unused_import
+warning - The value of the field '_maxRetries' isn't used - lib\services\whatsapp_service.dart:9:16 - unused_field
+warning - The value of the field '_retryDelayMs' isn't used - lib\services\whatsapp_service.dart:10:16 - unused_field
+warning - The value of the field '_apiUrl' isn't used - lib\services\whatsapp_service.dart:11:16 - unused_field
+   info - Don't invoke 'print' in production code - lib\services\whatsapp_service.dart:16:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\whatsapp_service.dart:25:7 - avoid_print
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\settings\features_page.dart:137:7 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps - lib\sign_in_page.dart:36:28 - use_build_context_synchronously
+  error - Undefined name '_logger' - lib\sign_in_page.dart:57:7 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\sign_in_page.dart:251:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\team_page.dart:309:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\technician_dashboard_page.dart:158:22 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\theme\modern_theme.dart:147:24 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\theme\modern_theme.dart:150:29 - deprecated_member_use
+   info - Parameter 'key' could be a super parameter - lib\theme\modern_theme.dart:178:9 - use_super_parameters
+  error - Expected an identifier - lib\theme\modern_theme.dart:235:52 - missing_identifier
+  error - Expected to find ':' - lib\theme\modern_theme.dart:235:52 - expected_token
+  error - Expected to find ')' - lib\theme\modern_theme.dart:235:71 - expected_token
+   info - Parameter 'key' could be a super parameter - lib\theme\modern_theme.dart:280:9 - use_super_parameters
+  error - Expected an identifier - lib\theme\modern_theme.dart:321:33 - missing_identifier
+  error - Expected to find ':' - lib\theme\modern_theme.dart:321:33 - expected_token
+  error - Expected to find ')' - lib\theme\modern_theme.dart:322:13 - expected_token
+   info - Parameter 'key' could be a super parameter - lib\theme\modern_theme.dart:337:9 - use_super_parameters
+  error - The name 'AurasphereCRM' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+   info - Don't invoke 'print' in production code - web_server.dart:6:3 - avoid_print
+
+97 issues found. (ran in 8.4s)

@@ -4,6 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 class OcrService {
   static String get _apiKey => dotenv.env['OCR_API_KEY'] ?? '';
@@ -53,7 +56,7 @@ class OcrService {
       }
       return null;
     } catch (e) {
-      print('OCR error: $e');
+      _logger.e('OCR error: $e');
       return null;
     }
   }

@@ -2,6 +2,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 class EmailService {
   static Future<bool> sendPaymentReminder({
@@ -29,7 +32,7 @@ class EmailService {
       
       return response.statusCode == 200;
     } catch (e) {
-      print('Email error: $e');
+      _logger.e('Email error: $e');
       return false;
     }
   }

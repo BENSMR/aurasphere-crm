@@ -1,6 +1,9 @@
 // lib/performance_page.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 class PerformancePage extends StatefulWidget {
   const PerformancePage({super.key});
@@ -118,7 +121,7 @@ class _PerformancePageState extends State<PerformancePage> {
         });
       }
     } catch (e) {
-      print('Error loading invoice stats: $e');
+      _logger.e('Error loading invoice stats: $e');
     }
   }
 

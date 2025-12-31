@@ -16,6 +16,7 @@
         "http",
         "image_picker",
         "intl",
+        "logger",
         "path_provider",
         "pdf",
         "printing",
@@ -51,6 +52,13 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "logger",
+      "version": "2.6.2",
+      "dependencies": [
+        "meta"
       ]
     },
     {

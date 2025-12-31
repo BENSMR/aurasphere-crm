@@ -1,5 +1,8 @@
 // lib/services/tax_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 class TaxService {
   // Lazy load Supabase only when needed
@@ -75,7 +78,7 @@ class TaxService {
         return getVatRate(client['country']);
       }
     } catch (e) {
-      print('Error getting client tax rate: $e');
+      _logger.e('Error getting client tax rate: $e');
     }
     return 0.0; // Default to no tax
   }
@@ -108,7 +111,7 @@ class TaxService {
         }
       }
     } catch (e) {
-      print('Error getting organization tax rate: $e');
+      _logger.e('Error getting organization tax rate: $e');
     }
     return 0.0; // Default to no tax
   }

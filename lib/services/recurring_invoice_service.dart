@@ -1,6 +1,9 @@
 // services/recurring_invoice_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
 import 'pdf_service.dart';
+
+final _logger = Logger();
 
 class RecurringInvoiceService {
   // Lazy load Supabase only when needed
@@ -34,7 +37,7 @@ class RecurringInvoiceService {
   
   /// Process all due recurring invoices
   static Future<void> processDueInvoices() async {
-    print('🔄 Processing recurring invoices...');
+    _logger.d('Processing recurring invoices...');
     
     final org = await supabase.from('organizations').select('id').maybeSingle();
     if (org == null) return;
@@ -52,11 +55,11 @@ class RecurringInvoiceService {
         await _generateInvoice(recurring);
         await _updateNextRunDate(recurring);
       } catch (e) {
-        print('❌ Failed to process recurring invoice ${recurring['id']}: $e');
+        _logger.e('Failed to process recurring invoice ${recurring['id']}: $e');
       }
     }
     
-    print('✅ Recurring invoices processed');
+    _logger.i('Recurring invoices processed');
   }
   
   /// Generate a single invoice from recurring schedule
@@ -122,7 +125,7 @@ class RecurringInvoiceService {
       'pdf_url': 'invoices/invoice_${newInvoice['id']}.pdf',
     }).eq('id', newInvoice['id']);
     
-    print('✅ Generated recurring invoice: $invoiceNumber');
+    _logger.i('Generated recurring invoice: $invoiceNumber');
   }
   
   /// Calculate next run date based on frequency

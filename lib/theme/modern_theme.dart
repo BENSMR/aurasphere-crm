@@ -51,103 +51,100 @@ class ModernTheme {
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient heroGradient = LinearGradient(
-    colors: [primaryBlue, primaryOrange],
+  static const LinearGradient neutralGradient = LinearGradient(
+    colors: [lightBackground, Color(0xFFF0F2F5)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  // ==================== BORDER RADIUS ====================
-  static const double radiusSmall = 8.0;
-  static const double radiusMedium = 12.0;
-  static const double radiusLarge = 16.0;
-  static const double radiusXL = 20.0;
-
-  // ==================== SPACING ====================
-  static const double spacingXS = 4.0;
-  static const double spacingS = 8.0;
-  static const double spacingM = 16.0;
-  static const double spacingL = 24.0;
-  static const double spacingXL = 32.0;
-  static const double spacingXXL = 48.0;
-
-  // ==================== TEXT STYLES ====================
+  // ==================== TYPOGRAPHY ====================
   static const TextStyle headline1 = TextStyle(
     fontSize: 48,
-    fontWeight: FontWeight.bold,
-    color: textDark,
+    fontWeight: FontWeight.w900,
     fontFamily: 'Manrope',
+    color: textDark,
   );
 
   static const TextStyle headline2 = TextStyle(
     fontSize: 36,
-    fontWeight: FontWeight.bold,
-    color: textDark,
+    fontWeight: FontWeight.w800,
     fontFamily: 'Manrope',
+    color: textDark,
   );
 
   static const TextStyle headline3 = TextStyle(
     fontSize: 28,
-    fontWeight: FontWeight.bold,
-    color: textDark,
+    fontWeight: FontWeight.w700,
     fontFamily: 'Manrope',
+    color: textDark,
   );
 
   static const TextStyle headline4 = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-    color: textDark,
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
     fontFamily: 'Manrope',
+    color: textDark,
   );
 
   static const TextStyle bodyLarge = TextStyle(
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: textDark,
     fontFamily: 'Manrope',
+    color: textDark,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 16,
+  static const TextStyle body = TextStyle(
+    fontSize: 14,
     fontWeight: FontWeight.w400,
-    color: textDark,
     fontFamily: 'Manrope',
+    color: textGray,
   );
 
   static const TextStyle bodySmall = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-    color: textGray,
-    fontFamily: 'Manrope',
-  );
-
-  static const TextStyle captionText = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w400,
-    color: textGray,
     fontFamily: 'Manrope',
+    color: textGray,
   );
 
-  // ==================== ANIMATION DURATIONS ====================
-  static const Duration animationFast = Duration(milliseconds: 200);
+  // ==================== SPACING ====================
+  static const double spacingXS = 4;
+  static const double spacingS = 8;
+  static const double spacingM = 16;
+  static const double spacingL = 24;
+  static const double spacingXL = 32;
+  static const double spacing2XL = 48;
+
+  // ==================== RADIUS ====================
+  static const double radiusSmall = 8;
+  static const double radiusMedium = 12;
+  static const double radiusLarge = 16;
+  static const double radiusXL = 24;
+
+  // ==================== ANIMATIONS ====================
+  static const Duration animationFast = Duration(milliseconds: 150);
   static const Duration animationNormal = Duration(milliseconds: 300);
   static const Duration animationSlow = Duration(milliseconds: 500);
 
-  // ==================== HELPER METHODS ====================
+  // ==================== DECORATIONS ====================
   static BoxDecoration cardDecoration({bool hover = false}) {
     return BoxDecoration(
       color: cardWhite,
       borderRadius: BorderRadius.circular(radiusMedium),
+      border: Border.all(
+        color: borderGray.withValues(alpha: 0.5),
+        width: 1,
+      ),
       boxShadow: hover ? hoverShadow : cardShadow,
     );
   }
 
   static BoxDecoration glassmorphDecoration() {
     return BoxDecoration(
-      color: cardWhite.withOpacity(0.7),
+      color: cardWhite.withValues(alpha: 0.7),
       borderRadius: BorderRadius.circular(radiusMedium),
       border: Border.all(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         width: 1.5,
       ),
       boxShadow: glassmorphShadow,
@@ -169,21 +166,21 @@ class ModernTheme {
 /// Modern Button Styles
 class ModernButton extends StatefulWidget {
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color color;
-  final bool fullWidth;
-  final Widget? icon;
+  final IconData? icon;
   final bool loading;
+  final bool fullWidth;
 
   const ModernButton({
-    Key? key,
+    super.key,
     required this.label,
-    required this.onPressed,
+    this.onPressed,
     this.color = ModernTheme.primaryBlue,
-    this.fullWidth = false,
     this.icon,
     this.loading = false,
-  }) : super(key: key);
+    this.fullWidth = false,
+  });
 
   @override
   State<ModernButton> createState() => _ModernButtonState();
@@ -238,7 +235,7 @@ class _ModernButtonState extends State<ModernButton>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (widget.icon != null && !widget.loading) ...[
-                widget.icon!,
+                Icon(widget.icon, color: Colors.white),
                 const SizedBox(width: ModernTheme.spacingS),
               ],
               if (widget.loading)
@@ -247,9 +244,7 @@ class _ModernButtonState extends State<ModernButton>
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white,
-                    ),
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
               else
@@ -278,12 +273,12 @@ class ModernCard extends StatefulWidget {
   final bool hover;
 
   const ModernCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding = const EdgeInsets.all(ModernTheme.spacingL),
     this.borderRadius = ModernTheme.radiusMedium,
     this.hover = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ModernCard> createState() => _ModernCardState();
@@ -335,10 +330,10 @@ class ModernPageTransition extends StatelessWidget {
   final Offset beginOffset;
 
   const ModernPageTransition({
-    Key? key,
+    super.key,
     required this.child,
     this.beginOffset = const Offset(0, 0.1),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

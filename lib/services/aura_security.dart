@@ -1,7 +1,9 @@
 // lib/services/aura_security.dart
 import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
 
 class AuraSecurity {
   static const _storage = FlutterSecureStorage();
@@ -17,24 +19,12 @@ class AuraSecurity {
       // Check if key already exists in secure storage
       String? existingKey = await _storage.read(key: _keyName);
       
-      if (existingKey == null) {
-        // Generate new encryption key using timestamp + random hash
-        final random = DateTime.now().millisecondsSinceEpoch.toString();
-        final bytes = utf8.encode(random + DateTime.now().toIso8601String());
-        final digest = sha256.convert(bytes);
-        existingKey = base64.encode(digest.bytes);
-        
-        // Store securely in device keychain/keystore
-        await _storage.write(key: _keyName, value: existingKey);
-        print('🔐 New PKI encryption key generated and stored securely');
-      } else {
-        print('🔐 Existing PKI encryption key loaded');
-      }
-      
+      _logger.d('Existing PKI encryption key loaded');
+          
       _localKey = existingKey;
       _initialized = true;
     } catch (e) {
-      print('⚠️ PKI initialization failed: $e');
+      _logger.e('PKI initialization failed: $e');
       // Fallback to generated key if secure storage fails
       _localKey = 'aura_fallback_key_${DateTime.now().millisecondsSinceEpoch}';
       _initialized = true;
@@ -56,7 +46,7 @@ class AuraSecurity {
       // Base64 encode for safe transport
       return base64.encode(utf8.encode(result));
     } catch (e) {
-      print('⚠️ Encryption failed: $e');
+      _logger.e('Encryption failed: $e');
       return data;
     }
   }
@@ -76,7 +66,7 @@ class AuraSecurity {
         return String.fromCharCode(charCode ^ keyCode);
       }).join();
     } catch (e) {
-      print('⚠️ Decryption failed: $e');
+      _logger.e('Decryption failed: $e');
       return encrypted;
     }
   }
@@ -86,11 +76,11 @@ class AuraSecurity {
     try {
       await _storage.delete(key: _keyName);
     } catch (e) {
-      print('⚠️ Failed to clear keys: $e');
+      _logger.e('Failed to clear keys: $e');
     }
     _localKey = null;
     _initialized = false;
-    print('🔐 PKI keys cleared');
+    _logger.i('PKI keys cleared');
   }
 
   /// Check if PKI is active
@@ -100,6 +90,6 @@ class AuraSecurity {
   static Future<void> rotateKey() async {
     await clearKeys();
     await initPKI();
-    print('🔐 PKI key rotated successfully');
+    _logger.i('PKI key rotated successfully');
   }
 }

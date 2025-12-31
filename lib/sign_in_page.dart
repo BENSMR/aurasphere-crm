@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logger/logger.dart';
 import 'theme/modern_theme.dart';
+
+final _logger = Logger();
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -47,6 +50,19 @@ class _SignInPageState extends State<SignInPage> {
       await supabase.auth.signUp(
         email: _email.text.trim(),
         password: _password.text.trim(),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Check your email to confirm signup')),
+        );
+      }
+    } catch (e) {
+      _logger.e('Sign up error: $e');
+      if (mounted) {
+        setState(() => _errorMessage = 'Sign up failed: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -358,12 +374,6 @@ class _SignInPageState extends State<SignInPage> {
           ),
         ),
       ],
-    );
-                ],
-              ),
-          ],
-        ),
-      ),
     );
   }
 }

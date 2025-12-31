@@ -6,16 +6,20 @@ class LandingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFF6600), Color(0xFF0066FF)],
-          ),
-        ),
-        child: const Center(
-          child: Text(
-            '🔥 NEW ANIMATED LANDING PAGE',
-            style: TextStyle(fontSize: 24, color: Colors.white),
+      body: SafeArea(
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _HeroSection(),
+                _PainPoints(),
+                _Features(),
+                _SocialProof(),
+                _FinalCTA(),
+                _Footer(),
+              ],
+            ),
           ),
         ),
       ),
@@ -23,7 +27,7 @@ class LandingPage extends StatelessWidget {
   }
 }
 
-// ================== HERO SECTION (KILLER HOOK) ==================
+// ================== HERO SECTION ==================
 class _HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,7 +57,7 @@ class _HeroSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 20,
                           offset: const Offset(0, 6),
                         ),
@@ -68,13 +72,6 @@ class _HeroSection extends StatelessWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF0066FF),
-                      shadows: [
-                        Shadow(
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                          color: Colors.black.withOpacity(0.1),
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -95,116 +92,79 @@ class _HeroSection extends StatelessWidget {
           ),
           const SizedBox(height: 100),
           
-          // HEADLINE (VALUE-FIRST)
+          // HEADLINE
           SizedBox(
             width: MediaQuery.of(context).size.width > 800 ? 700 : double.infinity,
             child: Text.rich(
               TextSpan(
                 style: const TextStyle(fontSize: 56, fontWeight: FontWeight.bold, height: 1.05),
                 children: [
-                  TextSpan(
-                    text: 'The ',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  TextSpan(
-                    text: 'Sovereign ',
-                    style: const TextStyle(color: Color(0xFF0066FF)),
-                  ),
-                  TextSpan(
-                    text: 'CRM\n',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  TextSpan(
-                    text: 'For ',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  TextSpan(
-                    text: 'Tradespeople',
-                    style: const TextStyle(color: Color(0xFFFF6600)),
-                  ),
+                  TextSpan(text: 'Stop Losing Jobs to ', style: const TextStyle(color: Colors.black)),
+                  TextSpan(text: 'Spreadsheets', style: const TextStyle(color: Color(0xFF0066FF))),
                 ],
               ),
-              maxLines: 3,
+              maxLines: 2,
             ),
           ),
           const SizedBox(height: 24),
           
-          // SUBHEADLINE (BENEFIT-DRIVEN)
+          // SUBHEADLINE
           SizedBox(
             width: MediaQuery.of(context).size.width > 800 ? 600 : double.infinity,
             child: Text(
-              'Manage jobs, clients, and invoices in one place — with zero tracking, EU-hosted infrastructure, and AI that speaks your language.',
-              style: const TextStyle(
-                fontSize: 20,
-                color: Color(0xFF495057),
-                height: 1.5,
-                fontWeight: FontWeight.w500,
-              ),
+              'The only CRM built for tradespeople — manage jobs, invoices, and teams in one place. No tech skills needed.',
+              style: const TextStyle(fontSize: 20, color: Color(0xFF495057), height: 1.5),
             ),
           ),
           const SizedBox(height: 40),
           
-          // DUAL CTA (PRIMARY + SECONDARY)
+          // PRIMARY CTA
           SizedBox(
             width: MediaQuery.of(context).size.width > 700 ? 400 : double.infinity,
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/sign-in'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0066FF),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                      elevation: 0,
-                      textStyle: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Start Free Trial'),
-                        SizedBox(width: 10),
-                        Icon(Icons.arrow_forward, size: 22),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  '✅ 3 days full access • No credit card • Cancel anytime',
-                  style: TextStyle(color: Color(0xFF6C757D), fontSize: 15),
-                ),
-              ],
+            child: ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/sign-in'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0066FF),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                elevation: 0,
+                textStyle: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Start Free Trial'),
+                  SizedBox(width: 10),
+                  Icon(Icons.arrow_forward, size: 22),
+                ],
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '✅ No credit card • 3 days full access • Cancel anytime',
+            style: const TextStyle(color: Color(0xFF6C757D), fontSize: 15),
           ),
           
           const SizedBox(height: 80),
           
-          // HERO VISUAL (APP DEMO)
+          // HERO VISUAL
           Container(
             height: MediaQuery.of(context).size.width > 1000 ? 500 : 350,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(28),
-              color: Colors.white,
+              color: Colors.grey[100],
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 40,
                   offset: const Offset(0, 15),
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: Image.asset(
-                'assets/hero_app_demo.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => const Center(
-                  child: Text('App Demo: Job Tracking + Invoicing', style: TextStyle(color: Colors.grey)),
-                ),
-              ),
+            child: const Center(
+              child: Text('App Demo: Job Tracking + Invoicing', style: TextStyle(color: Colors.grey)),
             ),
           ),
         ],
@@ -213,43 +173,24 @@ class _HeroSection extends StatelessWidget {
   }
 }
 
-// ================== PAIN POINTS (EMPATHY ENGINE) ==================
+// ================== PAIN POINTS ==================
 class _PainPoints extends StatelessWidget {
   final pains = [
-    {
-      'icon': Icons.receipt_long_outlined,
-      'title': 'Lost Invoices',
-      'desc': 'Chasing late payments? Get paid 2x faster with AI-generated invoices.',
-      'color': Colors.redAccent,
-    },
-    {
-      'icon': Icons.calendar_month_outlined,
-      'title': 'Double-Booked Jobs',
-      'desc': 'See your whole team\'s schedule in one live view — no more conflicts.',
-      'color': Colors.blueAccent,
-    },
-    {
-      'icon': Icons.inventory_2_outlined,
-      'title': 'Stock Surprises',
-      'desc': 'Low pipe alerts before you leave the warehouse — never run out again.',
-      'color': Colors.greenAccent,
-    },
+    {'icon': Icons.receipt_long, 'title': 'Lost Invoices', 'desc': 'Chasing late payments? Never lose money again.'},
+    {'icon': Icons.schedule, 'title': 'Double-Booked Jobs', 'desc': 'See your whole team\'s schedule in one place.'},
+    {'icon': Icons.inventory_2, 'title': 'Stock Surprises', 'desc': 'Low pipe alerts before you leave the warehouse.'},
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 100),
-      color: Colors.white,
+      color: Colors.grey[50],
       child: Column(
         children: [
           Text(
             'Tradespeople told us their biggest headaches:',
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF212529),
-            ),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 60),
@@ -269,7 +210,7 @@ class _PainPoints extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -281,32 +222,20 @@ class _PainPoints extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: (pain['color'] as Color).withOpacity(0.1),
+                          color: Colors.red.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
-                          pain['icon'] as IconData,
-                          color: pain['color'] as Color,
-                          size: 32,
-                        ),
+                        child: Icon(pain['icon'] as IconData, color: Colors.red, size: 32),
                       ),
                       const SizedBox(height: 20),
                       Text(
                         pain['title'] as String,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                          color: Color(0xFF212529),
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         pain['desc'] as String,
-                        style: const TextStyle(
-                          color: Color(0xFF6C757D),
-                          fontSize: 17,
-                          height: 1.4,
-                        ),
+                        style: const TextStyle(color: Color(0xFF6C757D), fontSize: 17, height: 1.4),
                       ),
                     ],
                   ),
@@ -320,29 +249,13 @@ class _PainPoints extends StatelessWidget {
   }
 }
 
-// ================== FEATURES (BENEFIT-FOCUSED) ==================
+// ================== FEATURES ==================
 class _Features extends StatelessWidget {
   final features = [
-    {
-      'icon': Icons.work_outline,
-      'title': 'Job Tracking',
-      'desc': 'Status, materials, photos, and client notes in one place — no more spreadsheets.'
-    },
-    {
-      'icon': Icons.auto_awesome,
-      'title': 'AI Invoicing',
-      'desc': '"Create invoice for Ahmed 300 AED" → done in 10 seconds with multilingual PDFs.'
-    },
-    {
-      'icon': Icons.group_work,
-      'title': 'Team Dispatch',
-      'desc': 'Assign jobs, track location, and see live availability — all from your phone.'
-    },
-    {
-      'icon': Icons.language,
-      'title': '9 Languages',
-      'desc': 'EN/FR/AR/IT/DE/ES/MT + Arabic dialects — invoices in your client\'s language.'
-    },
+    {'icon': Icons.work, 'title': 'Job Tracking', 'desc': 'Status, materials, photos, and client notes in one place'},
+    {'icon': Icons.auto_awesome, 'title': 'AI Invoicing', 'desc': '"Create invoice for Ahmed 300 AED" → done in 10 seconds'},
+    {'icon': Icons.group, 'title': 'Team Dispatch', 'desc': 'Assign jobs, track location, and see live availability'},
+    {'icon': Icons.language, 'title': '9 Languages', 'desc': 'EN/FR/AR/IT/DE/ES/MT + Arabic dialects'},
   ];
 
   @override
@@ -351,13 +264,9 @@ class _Features extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 100),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Everything You Need, Nothing You Don\'t',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF212529),
-            ),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 60),
@@ -377,7 +286,7 @@ class _Features extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Colors.black.withValues(alpha: 0.04),
                             blurRadius: 15,
                             offset: const Offset(0, 5),
                           ),
@@ -385,28 +294,16 @@ class _Features extends StatelessWidget {
                       ),
                       child: Column(
                         children: [
-                          Icon(
-                            feature['icon'] as IconData,
-                            color: const Color(0xFF0066FF),
-                            size: 36,
-                          ),
+                          Icon(feature['icon'] as IconData, color: const Color(0xFF0066FF), size: 36),
                           const SizedBox(height: 16),
                           Text(
                             feature['title'] as String,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Color(0xFF212529),
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             feature['desc'] as String,
-                            style: const TextStyle(
-                              color: Color(0xFF6C757D),
-                              fontSize: 16,
-                              height: 1.5,
-                            ),
+                            style: const TextStyle(color: Color(0xFF6C757D), fontSize: 16, height: 1.5),
                           ),
                         ],
                       ),
@@ -422,22 +319,18 @@ class _Features extends StatelessWidget {
   }
 }
 
-// ================== SOCIAL PROOF (TRUST ACCELERATOR) ==================
+// ================== SOCIAL PROOF ==================
 class _SocialProof extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 100),
-      color: const Color(0xFFF8F9FA),
+      color: Colors.grey[50],
       child: Column(
         children: [
-          const Text(
+          Text(
             'Trusted by 500+ Trades Across 12 Countries',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF212529),
-            ),
+            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 60),
@@ -447,7 +340,7 @@ class _SocialProof extends StatelessWidget {
               _TestimonialCard(
                 name: 'Ahmed K.',
                 role: 'Plumber, Dubai',
-                quote: 'Invoices in Arabic? Yes! Got paid 2x faster with AuraSphere.',
+                quote: 'Invoices in Arabic? Yes! Got paid 2x faster.',
                 color: const Color(0xFF0066FF),
               ),
               const SizedBox(width: 30),
@@ -458,24 +351,6 @@ class _SocialProof extends StatelessWidget {
                 color: const Color(0xFFFF6600),
               ),
             ],
-          ),
-          const SizedBox(height: 60),
-          // CLIENT LOGOS
-          Wrap(
-            spacing: 40,
-            runSpacing: 20,
-            alignment: WrapAlignment.center,
-            children: List.generate(5, (index) {
-              return Container(
-                width: 120,
-                height: 50,
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE9ECEF)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(child: Text('Client $index')),
-              );
-            }),
           ),
         ],
       ),
@@ -503,7 +378,7 @@ class _TestimonialCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -518,7 +393,7 @@ class _TestimonialCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -538,12 +413,7 @@ class _TestimonialCard extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             '"$quote"',
-            style: const TextStyle(
-              fontStyle: FontStyle.italic,
-              fontSize: 18,
-              height: 1.5,
-              color: Color(0xFF495057),
-            ),
+            style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 18, height: 1.5),
           ),
         ],
       ),
@@ -551,7 +421,7 @@ class _TestimonialCard extends StatelessWidget {
   }
 }
 
-// ================== FINAL CTA (URGENCY ENGINE) ==================
+// ================== FINAL CTA ==================
 class _FinalCTA extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -567,7 +437,7 @@ class _FinalCTA extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 50,
             offset: const Offset(0, 20),
           ),
@@ -612,7 +482,7 @@ class _FinalCTA extends StatelessWidget {
   }
 }
 
-// ================== FOOTER (TRUST SIGNALS) ==================
+// ================== FOOTER ==================
 class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -636,12 +506,12 @@ class _Footer extends StatelessWidget {
                 child: const Icon(Icons.construction, color: Colors.white, size: 22),
               ),
               const SizedBox(width: 16),
-              const Text(
+              Text(
                 'AuraSphere CRM',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0066FF),
+                  color: const Color(0xFF0066FF),
                 ),
               ),
             ],
@@ -668,17 +538,6 @@ class _Footer extends StatelessWidget {
             'Operated by Black Diamond LTD (UIC: 207807571), Sofia, Bulgaria',
             style: TextStyle(color: Color(0xFF6C757D), fontSize: 15),
           ),
-          const SizedBox(height: 20),
-          // PAYMENT BADGES
-          Wrap(
-            spacing: 15,
-            alignment: WrapAlignment.center,
-            children: [
-              Image.asset('assets/paddle_badge.png', height: 30, errorBuilder: (_, __, ___) => const Text('Paddle')),
-              Image.asset('assets/gdpr_badge.png', height: 30, errorBuilder: (_, __, ___) => const Text('GDPR')),
-              Image.asset('assets/eu_hosted_badge.png', height: 30, errorBuilder: (_, __, ___) => const Text('EU Hosted')),
-            ],
-          ),
         ],
       ),
     );
@@ -700,5 +559,5 @@ class _FooterLink extends StatelessWidget {
 }
 
 Future<void> _launchURL(String url) async {
-  // For web, use JS interop or window.open
+  // For web, this can be a no-op or use JS interop
 }
