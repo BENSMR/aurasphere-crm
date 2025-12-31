@@ -42,8 +42,8 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
       }
       
       if (mounted) {
-        invoices = invResponse as List<Map<String, dynamic>>;
-        clients = clientResponse as List<Map<String, dynamic>>;
+        invoices = invResponse;
+        clients = clientResponse;
         showExplanations = explanationsEnabled;
         setState(() => loading = false);
       }
@@ -112,7 +112,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
               // Client picker
               DropdownButtonFormField<String>(
                 hint: const Text('Select client'),
-                value: selectedClientId,
+                initialValue: selectedClientId,
                 items: clients.map((c) => DropdownMenuItem<String>(
                   value: c['id'].toString(),
                   child: Text(c['name'] ?? 'Unnamed'),
@@ -127,7 +127,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
               ),
               // Currency
               DropdownButtonFormField<String>(
-                value: currencyCtrl.text,
+                initialValue: currencyCtrl.text,
                 items: const [
                   DropdownMenuItem(value: 'EUR', child: Text('€ EUR')),
                   DropdownMenuItem(value: 'USD', child: Text('\$ USD')),
@@ -190,7 +190,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                 final pdfBytes = await pdfFile.readAsBytes();
                 await supabase.storage
                     .from('invoices')
-                    .upload('invoice_${newInvoice['id']}.pdf', pdfBytes);
+                    .uploadBinary('invoice_\.pdf', pdfBytes);
 
                 // Update invoice with PDF URL
                 await supabase.from('invoices').update({

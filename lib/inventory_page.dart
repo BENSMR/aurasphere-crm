@@ -23,7 +23,7 @@ class _InventoryPageState extends State<InventoryPage> {
           .select()
           .eq('org_id', org['id'])
           .order('name');
-      if (mounted) setState(() => inventory = data as List<Map<String, dynamic>>);
+      if (mounted) setState(() => inventory = data);
     } finally {
       if (mounted) setState(() => loading = false);
     }

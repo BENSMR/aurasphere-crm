@@ -37,8 +37,8 @@ class _DispatchPageState extends State<DispatchPage> {
       
       if (mounted) {
         setState(() {
-          unassignedJobs = jobs as List<Map<String, dynamic>>;
-          teamMembers = members as List<Map<String, dynamic>>;
+          unassignedJobs = jobs;
+          teamMembers = members;
           loading = false;
         });
       }
@@ -72,7 +72,7 @@ class _DispatchPageState extends State<DispatchPage> {
         workload[member['user_id']] = 0;
       }
       
-      for (final job in allJobs as List<Map<String, dynamic>>) {
+      for (final job in allJobs) {
         final assignedTo = job['assigned_to'];
         if (assignedTo != null && workload.containsKey(assignedTo)) {
           workload[assignedTo] = (workload[assignedTo] ?? 0) + 1;
@@ -160,7 +160,7 @@ class _DispatchPageState extends State<DispatchPage> {
                               onTap: () => _assignJob(job['id'], member['user_id']),
                               trailing: const Icon(Icons.arrow_forward, color: Colors.blue),
                             );
-                          }).toList(),
+                          }),
                         ],
                       ),
                     );

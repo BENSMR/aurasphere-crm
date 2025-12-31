@@ -15,6 +15,19 @@ class _PerformancePageState extends State<PerformancePage> {
   Map<String, dynamic>? invoiceStats;
   String? userPlan;
 
+  @override
+  void initState() {
+    super.initState();
+    if (supabase.auth.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/');
+      });
+    } else {
+      _loadStats();
+      _loadInvoiceStats();
+    }
+  }
+
   Future<void> _loadStats() async {
     final org = await supabase.from('organizations').select('id, plan').single();
     
@@ -110,14 +123,14 @@ class _PerformancePageState extends State<PerformancePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _loadStats();
-    _loadInvoiceStats();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Defensive auth check: prevent render if not authenticated
+    if (supabase.auth.currentUser == null) {
+      return const Scaffold(
+        body: Center(child: Text('Redirecting to login...')),
+      );
+    }
+
     if (stats == null || invoiceStats == null || userPlan == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }

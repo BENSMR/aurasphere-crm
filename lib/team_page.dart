@@ -39,7 +39,7 @@ class _TeamPageState extends State<TeamPage> {
             .from('org_members')
             .select('*, users(email)')
             .eq('org_id', orgData['id']);
-        memberData = membersResponse as List<Map<String, dynamic>>;
+        memberData = membersResponse;
       }
 
       if (mounted) {

@@ -19,7 +19,7 @@ class PdfService {
     final labels = _getLabels(language);
     
     final currencySymbol = _getCurrencySymbol(currency);
-    final formattedAmount = '${currencySymbol}${amount.toStringAsFixed(2)}';
+    final formattedAmount = '$currencySymbol${amount.toStringAsFixed(2)}';
 
     pdf.addPage(
       pw.Page(

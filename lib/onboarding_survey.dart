@@ -15,7 +15,7 @@ class _OnboardingSurveyState extends State<OnboardingSurvey> {
   int _step = 0;
   String? _businessType;
   String? _teamSize;
-  List<String> _goals = [];
+  final List<String> _goals = [];
 
   final _businessTypes = [
     {'type': 'freelancer', 'title': 'Solo freelancer', 'subtitle': 'Designers, developers, consultants'},

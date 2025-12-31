@@ -38,7 +38,7 @@ class _ClientListPageState extends State<ClientListPage> {
       
       if (mounted) {
         setState(() {
-          clients = data as List<Map<String, dynamic>>;
+          clients = data;
           showHealth = healthEnabled;
         });
       }

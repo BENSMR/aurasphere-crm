@@ -15,11 +15,18 @@ class _AuraChatPageState extends State<AuraChatPage> {
   final _scrollController = ScrollController();
   final _messages = <Map<String, dynamic>>[];
   String _userLang = 'en';
+  final supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
-    _loadUserLanguage();
+    if (supabase.auth.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/');
+      });
+    } else {
+      _loadUserLanguage();
+    }
   }
 
   Future<void> _loadUserLanguage() async {
@@ -179,6 +186,13 @@ class _AuraChatPageState extends State<AuraChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Defensive auth check: prevent render if not authenticated
+    if (supabase.auth.currentUser == null) {
+      return const Scaffold(
+        body: Center(child: Text('Redirecting to login...')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Row(

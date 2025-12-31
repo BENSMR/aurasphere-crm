@@ -35,7 +35,7 @@ class _LeadImportPageState extends State<LeadImportPage> {
           .eq('org_id', org['id'])
           .order('created_at', ascending: false)
           .limit(20);
-      if (mounted) setState(() => leads = data as List<Map<String, dynamic>>);
+      if (mounted) setState(() => leads = data);
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -85,7 +85,7 @@ class _LeadImportPageState extends State<LeadImportPage> {
                   
                   // Source picker
                   DropdownButtonFormField<String>(
-                    value: _source,
+                    initialValue: _source,
                     items: const [
                       DropdownMenuItem(value: 'facebook', child: Text('Facebook')),
                       DropdownMenuItem(value: 'instagram', child: Text('Instagram')),

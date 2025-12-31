@@ -96,7 +96,7 @@ class _JobListPageState extends State<JobListPage> {
           .eq('org_id', org['id']);
       
       // Filter items where quantity < min_stock
-      final lowStock = (allInventory as List<Map<String, dynamic>>)
+      final lowStock = (allInventory)
           .where((item) => (item['quantity'] as num) < (item['min_stock'] as num))
           .toList();
       

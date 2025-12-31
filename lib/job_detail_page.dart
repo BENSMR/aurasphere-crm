@@ -47,8 +47,8 @@ class _JobDetailPageState extends State<JobDetailPage> {
       
       if (mounted) {
         setState(() {
-          inventoryItems = inv as List<Map<String, dynamic>>;
-          stockMovements = moves as List<Map<String, dynamic>>;
+          inventoryItems = inv;
+          stockMovements = moves;
           loading = false;
         });
       }

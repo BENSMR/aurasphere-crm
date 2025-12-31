@@ -26,7 +26,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
           .select()
           .order('created_at', ascending: false);
       if (mounted) {
-        expenses = response as List<Map<String, dynamic>>;
+        expenses = response;
         setState(() => loading = false);
       }
     } finally {
@@ -55,7 +55,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
               DropdownButtonFormField<String>(
-                value: currencyCtrl.text,
+                initialValue: currencyCtrl.text,
                 items: const [
                   DropdownMenuItem(value: 'EUR', child: Text('€ EUR')),
                   DropdownMenuItem(value: 'USD', child: Text('\$ USD')),
@@ -108,7 +108,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                   // Upload image
                   final bytes = await File(receiptImage!.path).readAsBytes();
                   final fileName = 'receipt_${DateTime.now().millisecondsSinceEpoch}.jpg';
-                  await supabase.storage.from('receipts').upload(fileName, bytes);
+                  await supabase.storage.from('receipts').uploadBinary(fileName, bytes);
                   receiptPath = 'receipts/$fileName';
 
                   // Run OCR with user's language

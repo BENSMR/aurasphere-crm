@@ -1,0 +1,428 @@
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  final supabase = Supabase.instance.client;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auth check: redirect if not logged in
+    if (supabase.auth.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Double-check auth in build
+    if (supabase.auth.currentUser == null) {
+      return const Scaffold(
+        body: Center(child: Text('Redirecting to login...')),
+      );
+    }
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final isTablet = screenWidth >= 600 && screenWidth < 1000;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Dashboard'),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Header
+              const Text(
+                'Welcome Back!',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Here\'s what\'s happening with your business today',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+
+              // Key Metrics Cards
+              if (isMobile)
+                _buildMobileLayout()
+              else if (isTablet)
+                _buildTabletLayout()
+              else
+                _buildDesktopLayout(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Mobile: 8 Features
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        _buildMetricCard(
+          title: 'Total Revenue',
+          value: '\$12,450',
+          subtitle: 'This month',
+          icon: Icons.trending_up,
+          iconColor: Colors.green,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Active Jobs',
+          value: '8',
+          subtitle: 'In progress',
+          icon: Icons.work_outline,
+          iconColor: Colors.blue,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Pending Invoices',
+          value: '5',
+          subtitle: 'Worth \$3,200',
+          icon: Icons.receipt_long,
+          iconColor: Colors.orange,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Team Members',
+          value: '4',
+          subtitle: 'All active',
+          icon: Icons.people_outline,
+          iconColor: Colors.purple,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Completion Rate',
+          value: '94%',
+          subtitle: 'This month',
+          icon: Icons.check_circle_outline,
+          iconColor: Colors.teal,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Average Invoice',
+          value: '\$640',
+          subtitle: 'Up 12% from last month',
+          icon: Icons.payments_outlined,
+          iconColor: Colors.indigo,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'New Clients',
+          value: '3',
+          subtitle: 'This month',
+          icon: Icons.person_add_outlined,
+          iconColor: Colors.pink,
+        ),
+        const SizedBox(height: 12),
+        _buildMetricCard(
+          title: 'Upcoming Jobs',
+          value: '12',
+          subtitle: 'Next 7 days',
+          icon: Icons.calendar_today_outlined,
+          iconColor: Colors.cyan,
+        ),
+      ],
+    );
+  }
+
+  // Tablet: 12 Features
+  Widget _buildTabletLayout() {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      children: [
+        _buildMetricCard(
+          title: 'Total Revenue',
+          value: '\$12,450',
+          subtitle: 'This month',
+          icon: Icons.trending_up,
+          iconColor: Colors.green,
+        ),
+        _buildMetricCard(
+          title: 'Active Jobs',
+          value: '8',
+          subtitle: 'In progress',
+          icon: Icons.work_outline,
+          iconColor: Colors.blue,
+        ),
+        _buildMetricCard(
+          title: 'Pending Invoices',
+          value: '5',
+          subtitle: 'Worth \$3,200',
+          icon: Icons.receipt_long,
+          iconColor: Colors.orange,
+        ),
+        _buildMetricCard(
+          title: 'Team Members',
+          value: '4',
+          subtitle: 'All active',
+          icon: Icons.people_outline,
+          iconColor: Colors.purple,
+        ),
+        _buildMetricCard(
+          title: 'Completion Rate',
+          value: '94%',
+          subtitle: 'This month',
+          icon: Icons.check_circle_outline,
+          iconColor: Colors.teal,
+        ),
+        _buildMetricCard(
+          title: 'Average Invoice',
+          value: '\$640',
+          subtitle: 'Up 12% from last month',
+          icon: Icons.payments_outlined,
+          iconColor: Colors.indigo,
+        ),
+        _buildMetricCard(
+          title: 'New Clients',
+          value: '3',
+          subtitle: 'This month',
+          icon: Icons.person_add_outlined,
+          iconColor: Colors.pink,
+        ),
+        _buildMetricCard(
+          title: 'Upcoming Jobs',
+          value: '12',
+          subtitle: 'Next 7 days',
+          icon: Icons.calendar_today_outlined,
+          iconColor: Colors.cyan,
+        ),
+        _buildMetricCard(
+          title: 'Expenses',
+          value: '\$2,340',
+          subtitle: 'This month',
+          icon: Icons.receipt_outlined,
+          iconColor: Colors.deepOrange,
+        ),
+        _buildMetricCard(
+          title: 'Profit Margin',
+          value: '68%',
+          subtitle: 'Industry avg: 45%',
+          icon: Icons.show_chart_outlined,
+          iconColor: Colors.lightGreen,
+        ),
+        _buildMetricCard(
+          title: 'Customer Satisfaction',
+          value: '4.8/5',
+          subtitle: 'Based on 25 reviews',
+          icon: Icons.star_outline,
+          iconColor: Colors.amber,
+        ),
+        _buildMetricCard(
+          title: 'Repeat Clients',
+          value: '28',
+          subtitle: '70% of total',
+          icon: Icons.handshake_outlined,
+          iconColor: Colors.brown,
+        ),
+      ],
+    );
+  }
+
+  // Desktop: All Features (16+)
+  Widget _buildDesktopLayout() {
+    return GridView.count(
+      crossAxisCount: 4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 16,
+      crossAxisSpacing: 16,
+      children: [
+        _buildMetricCard(
+          title: 'Total Revenue',
+          value: '\$12,450',
+          subtitle: 'This month',
+          icon: Icons.trending_up,
+          iconColor: Colors.green,
+        ),
+        _buildMetricCard(
+          title: 'Active Jobs',
+          value: '8',
+          subtitle: 'In progress',
+          icon: Icons.work_outline,
+          iconColor: Colors.blue,
+        ),
+        _buildMetricCard(
+          title: 'Pending Invoices',
+          value: '5',
+          subtitle: 'Worth \$3,200',
+          icon: Icons.receipt_long,
+          iconColor: Colors.orange,
+        ),
+        _buildMetricCard(
+          title: 'Team Members',
+          value: '4',
+          subtitle: 'All active',
+          icon: Icons.people_outline,
+          iconColor: Colors.purple,
+        ),
+        _buildMetricCard(
+          title: 'Completion Rate',
+          value: '94%',
+          subtitle: 'This month',
+          icon: Icons.check_circle_outline,
+          iconColor: Colors.teal,
+        ),
+        _buildMetricCard(
+          title: 'Average Invoice',
+          value: '\$640',
+          subtitle: 'Up 12% from last month',
+          icon: Icons.payments_outlined,
+          iconColor: Colors.indigo,
+        ),
+        _buildMetricCard(
+          title: 'New Clients',
+          value: '3',
+          subtitle: 'This month',
+          icon: Icons.person_add_outlined,
+          iconColor: Colors.pink,
+        ),
+        _buildMetricCard(
+          title: 'Upcoming Jobs',
+          value: '12',
+          subtitle: 'Next 7 days',
+          icon: Icons.calendar_today_outlined,
+          iconColor: Colors.cyan,
+        ),
+        _buildMetricCard(
+          title: 'Expenses',
+          value: '\$2,340',
+          subtitle: 'This month',
+          icon: Icons.receipt_outlined,
+          iconColor: Colors.deepOrange,
+        ),
+        _buildMetricCard(
+          title: 'Profit Margin',
+          value: '68%',
+          subtitle: 'Industry avg: 45%',
+          icon: Icons.show_chart_outlined,
+          iconColor: Colors.lightGreen,
+        ),
+        _buildMetricCard(
+          title: 'Customer Satisfaction',
+          value: '4.8/5',
+          subtitle: 'Based on 25 reviews',
+          icon: Icons.star_outline,
+          iconColor: Colors.amber,
+        ),
+        _buildMetricCard(
+          title: 'Repeat Clients',
+          value: '28',
+          subtitle: '70% of total',
+          icon: Icons.handshake_outlined,
+          iconColor: Colors.brown,
+        ),
+        _buildMetricCard(
+          title: 'Response Time',
+          value: '2.3h',
+          subtitle: 'Avg first response',
+          icon: Icons.schedule_outlined,
+          iconColor: Colors.blueGrey,
+        ),
+        _buildMetricCard(
+          title: 'Projects Completed',
+          value: '156',
+          subtitle: 'All time',
+          icon: Icons.flag_outlined,
+          iconColor: Colors.red,
+        ),
+        _buildMetricCard(
+          title: 'Team Utilization',
+          value: '86%',
+          subtitle: 'Above target',
+          icon: Icons.assessment_outlined,
+          iconColor: Colors.lime,
+        ),
+        _buildMetricCard(
+          title: 'Year-to-Date Revenue',
+          value: '\$142,680',
+          subtitle: 'Up 24% YoY',
+          icon: Icons.analytics_outlined,
+          iconColor: Colors.purple,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetricCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+              Icon(icon, color: iconColor, size: 20),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -27,7 +27,7 @@ class _TechnicianDashboardPageState extends State<TechnicianDashboardPage> {
           .eq('assigned_to', userId)
           .inFilter('status', ['in_progress', 'pending'])
           .order('created_at', ascending: false);
-      if (mounted) setState(() => myJobs = data as List<Map<String, dynamic>>);
+      if (mounted) setState(() => myJobs = data);
     } finally {
       if (mounted) setState(() => loading = false);
     }

@@ -123,12 +123,10 @@ ${languageExamples[userLang] ?? languageExamples['en']}
         .ilike('name', '%$clientName%')
         .maybeSingle();
 
-    if (clientData == null) {
-      clientData = await supabase.from('clients').insert({
+    clientData ??= await supabase.from('clients').insert({
         'name': clientName,
         'email': '',
       }).select().single();
-    }
 
     // Generate invoice number
     final now = DateTime.now();

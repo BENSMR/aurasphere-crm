@@ -1,0 +1,6 @@
+// This file is disabled - see lib/client_list_page.dart for the active implementation
+// The features folder contains legacy modularized versions that are not currently used
+// To re-enable, you would need to create the missing utility files:
+// - lib/services/app_localizations.dart
+// - lib/widgets/common_widgets.dart
+// - lib/core/responsive_layout.dart

@@ -41,7 +41,7 @@ class _PerformanceInvoicePageState extends State<PerformanceInvoicePage> {
         .from('clients')
         .select()
         .eq('org_id', org['id']);
-    setState(() => clients = clientData as List<Map<String, dynamic>>);
+    setState(() => clients = clientData);
     
     // Load jobs (for line item suggestions)
     if (widget.jobId != null) {
@@ -131,7 +131,7 @@ class _PerformanceInvoicePageState extends State<PerformanceInvoicePage> {
           children: [
             // Client picker
             DropdownButtonFormField<String>(
-              value: _selectedClientId,
+              initialValue: _selectedClientId,
               items: clients.map((c) => DropdownMenuItem<String>(
                 value: c['id'] as String,
                 child: Text(c['name'] ?? 'Unnamed'),
@@ -155,7 +155,7 @@ class _PerformanceInvoicePageState extends State<PerformanceInvoicePage> {
             
             // Currency
             DropdownButtonFormField<String>(
-              value: _currency,
+              initialValue: _currency,
               items: const [
                 DropdownMenuItem(value: 'USD', child: Text('USD')),
                 DropdownMenuItem(value: 'EUR', child: Text('EUR')),
