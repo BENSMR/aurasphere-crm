@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
 import 'theme/modern_theme.dart';
+import 'services/feature_personalization_helper.dart';
+import 'services/rate_limit_service.dart';
+import 'validators/input_validators.dart';
 
 final _logger = Logger();
 
@@ -18,25 +21,71 @@ class _SignInPageState extends State<SignInPage> {
   bool _loading = false;
   bool _showPassword = false;
   String? _errorMessage;
+  final _rateLimitService = RateLimitService();
 
   Future<void> _signIn() async {
     final supabase = Supabase.instance.client;
     if (_loading) return;
+    
+    // Validate inputs
+    final emailError = InputValidators.validateEmail(_email.text.trim());
+    if (emailError != null) {
+      setState(() => _errorMessage = emailError);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(emailError))
+      );
+      return;
+    }
+    
     setState(() {
       _loading = true;
       _errorMessage = null;
     });
+    
     try {
+      final email = _email.text.trim();
+      
+      // Check rate limiting (5 attempts per 5 minutes)
+      final allowed = await _rateLimitService.isAllowed(
+        userEmail: email,
+        ipAddress: 'web-browser', // On web, IP detection requires backend
+      );
+      
+      if (!allowed) {
+        final remaining = await _rateLimitService.getRemainingAttempts(userEmail: email);
+        throw Exception('Too many login attempts. Please try again in 5 minutes.');
+      }
+      
+      // Attempt login
       await supabase.auth.signInWithPassword(
-        email: _email.text.trim(),
+        email: email,
         password: _password.text.trim(),
       );
+      
+      // Record successful attempt and clear rate limit
+      await _rateLimitService.recordAttempt(
+        userEmail: email,
+        ipAddress: 'web-browser',
+        success: true,
+      );
+      await _rateLimitService.clearAttempts(userEmail: email);
+      
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } on AuthException catch (e) {
+      // Record failed attempt for rate limiting
+      await _rateLimitService.recordAttempt(
+        userEmail: _email.text.trim(),
+        ipAddress: 'web-browser',
+        success: false,
+      );
+      
       setState(() => _errorMessage = e.message);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -45,12 +94,42 @@ class _SignInPageState extends State<SignInPage> {
   Future<void> _signUp() async {
     final supabase = Supabase.instance.client;
     if (_loading) return;
+    
+    // Validate inputs
+    final emailError = InputValidators.validateEmail(_email.text.trim());
+    if (emailError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(emailError))
+      );
+      return;
+    }
+    
+    final passwordError = InputValidators.validatePassword(_password.text.trim());
+    if (passwordError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(passwordError))
+      );
+      return;
+    }
+    
     setState(() => _loading = true);
     try {
-      await supabase.auth.signUp(
+      final response = await supabase.auth.signUp(
         email: _email.text.trim(),
         password: _password.text.trim(),
       );
+      
+      // Initialize feature personalization for new user
+      if (response.user != null) {
+        try {
+          await FeaturePersonalizationHelper().initializeForNewUser(response.user!.id);
+          _logger.i('✅ Feature personalization initialized for new user');
+        } catch (e) {
+          _logger.e('⚠️ Failed to initialize feature personalization: $e');
+          // Don't fail signup if personalization fails
+        }
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Check your email to confirm signup')),

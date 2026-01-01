@@ -229,7 +229,9 @@ class _ModernButtonState extends State<ModernButton>
             borderRadius: BorderRadius.circular(ModernTheme.radiusMedium),
             boxShadow: _hovering ? ModernTheme.hoverShadow : ModernTheme.cardShadow,
           ),
-          transform: _hovering ? Matrix4.identity()..translate(0, -2) : Matrix4.identity(),
+          transform: _hovering 
+              ? (Matrix4.identity()..translate(0.0, -2.0, 0.0))
+              : Matrix4.identity(),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -313,7 +315,7 @@ class _ModernCardState extends State<ModernCard>
         duration: ModernTheme.animationFast,
         decoration: ModernTheme.cardDecoration(hover: _hovering && widget.hover),
         transform: widget.hover && _hovering
-            ? Matrix4.identity()..translate(0, -4)
+            ? (Matrix4.identity()..translate(0.0, -4.0, 0.0))
             : Matrix4.identity(),
         child: Padding(
           padding: widget.padding,

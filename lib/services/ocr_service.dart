@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
+import '../core/env_loader.dart';
 
 final _logger = Logger();
 
 class OcrService {
-  static String get _apiKey => dotenv.env['OCR_API_KEY'] ?? '';
+  static String get _apiKey => EnvLoader.get('OCR_API_KEY');
 
   // Map your languages to OCR.space codes
   static String getOcrLanguage(String userLang) {

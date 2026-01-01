@@ -1,8 +1,8 @@
 // lib/services/email_service.dart
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import '../core/env_loader.dart';
 
 final _logger = Logger();
 
@@ -19,7 +19,7 @@ class EmailService {
       final response = await http.post(
         Uri.parse('https://api.resend.com/emails'),
         headers: {
-          'Authorization': 'Bearer ${dotenv.env['RESEND_API_KEY']}',
+          'Authorization': 'Bearer ${EnvLoader.get('RESEND_API_KEY')}',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({

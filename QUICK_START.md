@@ -1,53 +1,73 @@
-# 🎯 QUICK START GUIDE - AURASPHERE CRM FULL VERSION
-
-**Access Now:** http://localhost:8080
+# 🚀 QUICK START - DEPLOY IN 4 STEPS
+## ⏱️ Time Required: 10-15 minutes
 
 ---
 
-## 🚀 GET STARTED IN 60 SECONDS
+## STEP 1️⃣: Rebuild Flutter App (3-5 min)
 
-### **Step 1: Open the App** (10 seconds)
-```
-1. Go to http://localhost:8080 in your browser
-2. See the beautiful animated landing page
-3. Click "Start Free Trial" or "Sign Up"
-```
-
-### **Step 2: Create Account** (20 seconds)
-```
-1. Enter your email: test@example.com
-2. Enter password: test123456
-3. Click "Sign Up"
-4. Check Supabase dashboard for email verification link
-5. Click the verification link or use the dashboard
+```bash
+cd c:\Users\PC\AuraSphere\crm\aura_crm
+flutter clean
+flutter pub get
+flutter build web --release
 ```
 
-### **Step 3: Sign In** (10 seconds)
-```
-1. Enter email and password you just created
-2. Click "Sign In"
-3. Get redirected to dashboard
+✅ **Result**: White screen fixed! App loads landing page instantly.
+
+---
+
+## STEP 2️⃣: Deploy Edge Function (1-2 min)
+
+```bash
+supabase login
+supabase link --project-ref uielvgnzaurhopolerok
+supabase functions deploy facebook-lead-webhook
 ```
 
-### **Step 4: Explore Features** (20 seconds)
+✅ **Result**: Get webhook URL:
 ```
-1. See dashboard with metrics
-2. Click "Clients" → Add a test client
-3. Click "Invoices" → Create an invoice
-4. Click "Jobs" → Create a job
-5. Explore all other features
+https://uielvgnzaurhopolerok.supabase.co/functions/v1/facebook-lead-webhook
 ```
 
 ---
 
-## 📱 FEATURE ACCESS
+## STEP 3️⃣: Add Environment Variables (2-3 min)
 
-Once signed in, access features from bottom navigation bar:
+**Go to**: Supabase Dashboard → Settings → Environment Variables
 
-| Button | Feature | What You Can Do |
-|--------|---------|-----------------|
-| 📊 | Dashboard | View metrics, revenue, performance |
-| 👥 | Clients | Manage client database |
+**Add these 4 variables**:
+
+| Variable | Example Value |
+|----------|---------------|
+| `FACEBOOK_APP_SECRET` | Get from Meta Console |
+| `FACEBOOK_ACCESS_TOKEN` | Get from Facebook |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | `my_secure_token_123` |
+| `DEFAULT_ORG_ID` | Get from `SELECT id FROM organizations;` |
+
+---
+
+## STEP 4️⃣: Configure Facebook Webhook (2-3 min)
+
+**Go to**: https://developers.facebook.com/ → Your App → Webhooks
+
+**Setup**:
+1. Callback URL: Paste webhook URL from Step 2
+2. Verify Token: Paste your WHATSAPP_WEBHOOK_VERIFY_TOKEN
+3. Click **Verify and Save**
+
+**Subscribe to Events**:
+1. Check ☑️ **leadgen**
+2. Save
+
+---
+
+## 🧪 TEST IN 60 SECONDS
+
+1. Fill out a Facebook lead form
+2. Go to Supabase → Tables → `clients`
+3. See new row with `source: "facebook_lead_ads"`
+
+✅ **Integration working!**
 | 📋 | Invoices | Create, send, track invoices |
 | 📝 | Jobs | Manage jobs & technician assignments |
 | 🚚 | Dispatch | Assign jobs to team members |

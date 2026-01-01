@@ -13,6 +13,7 @@ import 'client_list_page.dart';
 import 'lead_import_page.dart';
 import 'performance_page.dart';
 import 'services/lead_agent_service.dart';
+import 'services/feature_personalization_helper.dart';
 
 final _logger = Logger();
 
@@ -34,8 +35,32 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkAuth(); // Add auth check first
     _checkSubscription();
     _runDailyAutomation();
+    _initializeFeaturePersonalization();
+  }
+
+  Future<void> _initializeFeaturePersonalization() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId != null) {
+        await FeaturePersonalizationHelper().initializeForNewUser(userId);
+        _logger.i('✅ Feature personalization loaded');
+      }
+    } catch (e) {
+      _logger.e('⚠️ Feature personalization load failed: $e');
+      // Non-critical, don't block page load
+    }
+  }
+
+  Future<void> _checkAuth() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    }
   }
 
   Future<void> _runDailyAutomation() async {
@@ -147,7 +172,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: Row(
             children: [
-              const Text('Aurasphere Workshop'),
+              const Text('AuraSphere Workshop'),
               if (_stripeStatus == 'trialing') ...[
                 const SizedBox(width: 12),
                 Container(
@@ -164,14 +189,27 @@ class _HomePageState extends State<HomePage> {
               ],
             ],
           ),
+          actions: [
+            TextButton.icon(
+              onPressed: () async {
+                await Supabase.instance.client.auth.signOut();
+                if (mounted) {
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                }
+              },
+              icon: const Icon(Icons.logout, color: Colors.red),
+              label: const Text('Logout', style: TextStyle(color: Colors.red)),
+            ),
+            const SizedBox(width: 16),
+          ],
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'Jobs'),
-              Tab(text: 'Leads'),
-              Tab(text: 'Inventory'),
-              Tab(text: 'Dispatch'),
-              Tab(text: 'Performance'),
-              Tab(text: 'Team'),
+              Tab(icon: Icon(Icons.work), text: 'Jobs'),
+              Tab(icon: Icon(Icons.people), text: 'Leads'),
+              Tab(icon: Icon(Icons.inventory_2), text: 'Inventory'),
+              Tab(icon: Icon(Icons.local_shipping), text: 'Dispatch'),
+              Tab(icon: Icon(Icons.analytics), text: 'Performance'),
+              Tab(icon: Icon(Icons.group), text: 'Team'),
             ],
           ),
         ),
@@ -191,6 +229,32 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    
+    // Auth guard - redirect if not authenticated
+    if (user == null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.lock_outline, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text(
+                'Please sign in to continue',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+                child: const Text('Go to Home'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }

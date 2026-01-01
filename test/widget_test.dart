@@ -13,9 +13,9 @@ import 'package:aura_crm/main.dart';
 void main() {
   testWidgets('Supabase initialization smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const SuccessApp());
+    await tester.pumpWidget(const MyApp());
 
-    // Verify success message appears
-    expect(find.text('✅ SUPABASE WORKS!'), findsOneWidget);
+    // Verify app loads
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

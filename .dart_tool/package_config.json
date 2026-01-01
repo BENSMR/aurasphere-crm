@@ -38,6 +38,18 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "args",
+      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.7.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
+      "name": "asn1lib",
+      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/asn1lib-1.6.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "async",
       "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/async-2.13.0",
       "packageUri": "lib/",
@@ -105,15 +117,21 @@
     },
     {
       "name": "dart_jsonwebtoken",
-      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/dart_jsonwebtoken-3.3.1",
+      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/dart_jsonwebtoken-3.1.1",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "2.12"
     },
     {
       "name": "ed25519_edwards",
       "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/ed25519_edwards-0.3.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "encrypt",
+      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/encrypt-5.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
     },
     {
       "name": "fake_async",
@@ -168,12 +186,6 @@
       "rootUri": "file:///C:/Users/flutter_windows_3.35.7-stable/flutter/packages/flutter",
       "packageUri": "lib/",
       "languageVersion": "3.8"
-    },
-    {
-      "name": "flutter_dotenv",
-      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/flutter_dotenv-6.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "flutter_lints",
@@ -483,7 +495,7 @@
     },
     {
       "name": "pointycastle",
-      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/pointycastle-4.0.0",
+      "rootUri": "file:///C:/Users/PC/AppData/Local/Pub/Cache/hosted/pub.dev/pointycastle-3.9.1",
       "packageUri": "lib/",
       "languageVersion": "3.2"
     },

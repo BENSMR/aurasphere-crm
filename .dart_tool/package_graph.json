@@ -9,8 +9,8 @@
       "dependencies": [
         "crypto",
         "cupertino_icons",
+        "encrypt",
         "flutter",
-        "flutter_dotenv",
         "flutter_localizations",
         "flutter_secure_storage",
         "http",
@@ -52,6 +52,18 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "encrypt",
+      "version": "5.0.3",
+      "dependencies": [
+        "args",
+        "asn1lib",
+        "clock",
+        "collection",
+        "crypto",
+        "pointycastle"
       ]
     },
     {
@@ -172,13 +184,6 @@
         "image_picker_macos",
         "image_picker_platform_interface",
         "image_picker_windows"
-      ]
-    },
-    {
-      "name": "flutter_dotenv",
-      "version": "6.0.0",
-      "dependencies": [
-        "flutter"
       ]
     },
     {
@@ -322,6 +327,25 @@
         "string_scanner",
         "term_glyph"
       ]
+    },
+    {
+      "name": "pointycastle",
+      "version": "3.9.1",
+      "dependencies": [
+        "collection",
+        "convert",
+        "js"
+      ]
+    },
+    {
+      "name": "asn1lib",
+      "version": "1.6.5",
+      "dependencies": []
+    },
+    {
+      "name": "args",
+      "version": "2.7.0",
+      "dependencies": []
     },
     {
       "name": "shared_preferences_windows",
@@ -801,6 +825,20 @@
       ]
     },
     {
+      "name": "js",
+      "version": "0.6.7",
+      "dependencies": [
+        "meta"
+      ]
+    },
+    {
+      "name": "convert",
+      "version": "3.1.2",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
       "name": "file",
       "version": "7.0.1",
       "dependencies": [
@@ -813,13 +851,6 @@
       "version": "5.15.0",
       "dependencies": [
         "ffi"
-      ]
-    },
-    {
-      "name": "js",
-      "version": "0.6.7",
-      "dependencies": [
-        "meta"
       ]
     },
     {
@@ -1036,10 +1067,12 @@
     },
     {
       "name": "dart_jsonwebtoken",
-      "version": "3.3.1",
+      "version": "3.1.1",
       "dependencies": [
         "clock",
+        "collection",
         "convert",
+        "crypto",
         "ed25519_edwards",
         "pointycastle"
       ]
@@ -1073,21 +1106,6 @@
         "collection",
         "convert",
         "crypto"
-      ]
-    },
-    {
-      "name": "convert",
-      "version": "3.1.2",
-      "dependencies": [
-        "typed_data"
-      ]
-    },
-    {
-      "name": "pointycastle",
-      "version": "4.0.0",
-      "dependencies": [
-        "collection",
-        "convert"
       ]
     },
     {

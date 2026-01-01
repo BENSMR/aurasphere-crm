@@ -13,32 +13,32 @@ class PricingPage extends StatelessWidget {
   // Tradesperson-focused pricing plans
   static const plans = [
     {
-      'name': 'Solo Tradesperson',
-      'discounted_price': '\$4.99',
-      'full_price': '\$9.99',
-      'description': '1 user • 20 jobs/month',
+      'name': 'Solo',
+      'price': '\$9.99',
+      'description': '1 user • 30 jobs/month • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • All features',
       'plan_id': 'solo_trades',
       'max_users': 1,
+      'max_jobs': 30,
       'stripe_url': 'https://buy.stripe.com/abc123', // ← Replace with your SOLO link
       'color': 0xFF2196F3, // Blue
     },
     {
-      'name': 'Small Team',
-      'discounted_price': '\$7.50',
-      'full_price': '\$15',
-      'description': '3 users • Unlimited jobs',
+      'name': 'Team',
+      'price': '\$20',
+      'description': '3 users • 120 jobs/month • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • All features',
       'plan_id': 'small_team',
       'max_users': 3,
+      'max_jobs': 120,
       'stripe_url': 'https://buy.stripe.com/def456', // ← Replace with your TEAM link
       'color': 0xFF3F51B5, // Indigo
     },
     {
       'name': 'Workshop',
-      'discounted_price': '\$14.50',
-      'full_price': '\$29',
-      'description': '7 users • Stock tracking • Team dispatch',
+      'price': '\$49',
+      'description': '7 users • Unlimited jobs • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • Dedicated support • Corporate & special requests • All features',
       'plan_id': 'workshop',
       'max_users': 7,
+      'max_jobs': 999999,
       'stripe_url': 'https://buy.stripe.com/ghi789', // ← Replace with your WORKSHOP link
       'color': 0xFF9C27B0, // Purple
     },
@@ -70,16 +70,59 @@ class PricingPage extends StatelessWidget {
               child: _buildPlanCard(
                 context,
                 plan['name'] as String,
-                plan['discounted_price'] as String,
-                plan['full_price'] as String,
+                plan['price'] as String,
                 plan['description'] as String,
                 plan['stripe_url'] as String,
                 plan['plan_id'] as String,
                 plan['max_users'] as int,
                 Color(plan['color'] as int),
               ),
-            )),
+            )),            
+            const SizedBox(height: 48),
             
+            // FEATURE COMPARISON TABLE
+            const Text(
+              'Feature Comparison',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('Feature')),
+                    DataColumn(label: Text('Solo')),
+                    DataColumn(label: Text('Team')),
+                    DataColumn(label: Text('Workshop')),
+                  ],
+                  rows: [
+                    _buildFeatureRow('Jobs/Month', '30', '120', 'Unlimited'),
+                    _buildFeatureRow('Team Members', '1', '3', '7'),
+                    _buildFeatureRow('Advanced Invoicing', '✓', '✓', '✓'),
+                    _buildFeatureRow('SMS Notifications', '✓', '✓', '✓'),
+                    _buildFeatureRow('Job Management', '✓', '✓', '✓'),
+                    _buildFeatureRow('Client Management', '✓', '✓', '✓'),
+                    _buildFeatureRow('Inventory Tracking', '✓', '✓', '✓'),
+                    _buildFeatureRow('Team Dispatch', '✓', '✓', '✓'),
+                    _buildFeatureRow('Calendar Scheduling', '✓', '✓', '✓'),
+                    _buildFeatureRow('HubSpot Integration', '✓', '✓', '✓'),
+                    _buildFeatureRow('QuickBooks Integration', '✓', '✓', '✓'),
+                    _buildFeatureRow('Advanced Analytics', '✓', '✓', '✓'),
+                    _buildFeatureRow('AI CEO Agent', '✓', '✓', '✓'),
+                    _buildFeatureRow('AI COO Agent', '✓', '✓', '✓'),
+                    _buildFeatureRow('AI CFO Agent', '✓', '✓', '✓'),
+                    _buildFeatureRow('Marketing Automation', '✓', '✓', '✓'),
+                    _buildFeatureRow('Custom Domain', '✓', '✓', '✓'),
+                  ],
+                ),
+              ),
+            ),            
             const SizedBox(height: 16),
             
             // Enterprise
@@ -133,8 +176,7 @@ class PricingPage extends StatelessWidget {
   Widget _buildPlanCard(
     BuildContext context,
     String title,
-    String discountedPrice,
-    String fullPrice,
+    String price,
     String description,
     String stripeUrl,
     String planId,
@@ -156,33 +198,24 @@ class PricingPage extends StatelessWidget {
                 color: accentColor,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              '✨ 7-day free trial',
-              style: TextStyle(color: Colors.green, fontSize: 15, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Text(
-                  discountedPrice,
+                  price,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: accentColor,
                   ),
                 ),
                 const Text(
-                  '/mo for 2 months',
+                  '/month',
                   style: TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            Text(
-              'Then $fullPrice/mo',
-              style: const TextStyle(color: Colors.grey, fontSize: 13),
-            ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               description,
               style: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -274,5 +307,14 @@ class PricingPage extends StatelessWidget {
     } else {
       throw 'Could not launch $url';
     }
+  }
+
+  static DataRow _buildFeatureRow(String feature, String solo, String team, String workshop) {
+    return DataRow(cells: [
+      DataCell(Text(feature, style: const TextStyle(fontWeight: FontWeight.w500))),
+      DataCell(Text(solo, style: TextStyle(color: solo == '✗' ? Colors.red : Colors.green))),
+      DataCell(Text(team, style: TextStyle(color: team == '✗' ? Colors.red : Colors.green))),
+      DataCell(Text(workshop, style: TextStyle(color: workshop == '✗' ? Colors.red : Colors.green))),
+    ]);
   }
 }

@@ -28,6 +28,74 @@ class _InvoicePersonalizationPageState extends State<InvoicePersonalizationPage>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/');
       });
+    } else {
+      _loadSavedSettings();
+    }
+  }
+
+  Future<void> _loadSavedSettings() async {
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final settings = await supabase
+          .from('invoice_settings')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (settings != null && mounted) {
+        setState(() {
+          _companyNameController.text = settings['company_name'] ?? '';
+          _companyAddressController.text = settings['company_address'] ?? '';
+          _companyPhoneController.text = settings['company_phone'] ?? '';
+          _companyEmailController.text = settings['company_email'] ?? '';
+          _invoiceNoteController.text = settings['invoice_note'] ?? '';
+          _selectedTemplate = settings['template'] ?? 'modern';
+          _showWatermark = settings['show_watermark'] ?? true;
+          _logoPath = settings['logo_url'];
+        });
+      }
+    } catch (e) {
+      print('Error loading invoice settings: $e');
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    try {
+      final userId = supabase.auth.currentUser?.id;
+      if (userId == null) return;
+
+      await supabase.from('invoice_settings').upsert({
+        'user_id': userId,
+        'company_name': _companyNameController.text,
+        'company_address': _companyAddressController.text,
+        'company_phone': _companyPhoneController.text,
+        'company_email': _companyEmailController.text,
+        'invoice_note': _invoiceNoteController.text,
+        'template': _selectedTemplate,
+        'show_watermark': _showWatermark,
+        'logo_url': _logoPath,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Invoice settings saved successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving settings: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      print('Error saving invoice settings: $e');
     }
   }
 
@@ -420,14 +488,7 @@ class _InvoicePersonalizationPageState extends State<InvoicePersonalizationPage>
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('✅ Invoice settings saved!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
+                onPressed: _saveSettings,
                 child: const Text('Save Settings'),
               ),
             ),
