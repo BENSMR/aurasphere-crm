@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 
 /// Modern glassmorphic design system for AuraSphere CRM
 class ModernTheme {
+  // ==================== BRAND COLORS (ENFORCED) ====================
+  /// Primary brand color - Electric Blue
+  static const Color electricBlue = Color(0xFF007BFF);
+  
+  /// Accent brand color - Green-Yellow
+  static const Color greenYellow = Color(0xFFBFFF00);
+  
   // ==================== COLORS ====================
-  static const Color primaryBlue = Color(0xFF0066FF);
-  static const Color primaryOrange = Color(0xFFFF6600);
+  static const Color primaryBlue = Color(0xFF007BFF);
+  static const Color primaryOrange = Color(0xFF007BFF);
   static const Color lightBackground = Color(0xFFF8F9FA);
   static const Color cardWhite = Color(0xFFFFFFFF);
-  static const Color textDark = Color(0xFF1a1a1a);
+  static const Color textDark = Color(0xFF1E293B); // Dark gray per spec
   static const Color textGray = Color(0xFF6C757D);
   static const Color borderGray = Color(0xFFE9ECEF);
-  static const Color successGreen = Color(0xFF00C853);
+  static const Color successGreen = Color(0xFF25D366); // WhatsApp green
   static const Color dangerRed = Color(0xFFFF3B30);
 
   // ==================== SHADOWS ====================
@@ -46,7 +53,7 @@ class ModernTheme {
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [primaryOrange, Color(0xFFFF8533)],
+    colors: [primaryOrange, Color(0xFF4DA6FF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -211,8 +218,9 @@ class _ModernButtonState extends State<ModernButton>
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
+      cursor: widget.loading || widget.onPressed == null ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: widget.loading ? null : widget.onPressed,
+        onTap: (widget.loading || widget.onPressed == null) ? null : widget.onPressed,
         child: AnimatedContainer(
           duration: ModernTheme.animationFast,
           width: widget.fullWidth ? double.infinity : null,

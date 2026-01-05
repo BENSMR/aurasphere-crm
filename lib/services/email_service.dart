@@ -1,12 +1,20 @@
 // lib/services/email_service.dart
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+/// 🔐 SECURE: All email sending goes through Supabase Edge Function
+/// This service never exposes API keys - they're stored securely in Supabase Secrets
+/// See: supabase/functions/send-email/index.ts
+library;
+
+
 import 'package:logger/logger.dart';
-import '../core/env_loader.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _logger = Logger();
 
 class EmailService {
+  static final supabase = Supabase.instance.client;
+
+  /// Send payment reminder email via secure Edge Function
+  /// 🔒 API key stored in Supabase Secrets (RESEND_API_KEY), never exposed on frontend
   static Future<bool> sendPaymentReminder({
     required String toEmail,
     required String invoiceNumber,
@@ -16,23 +24,31 @@ class EmailService {
     String language = 'en',
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('https://api.resend.com/emails'),
-        headers: {
-          'Authorization': 'Bearer ${EnvLoader.get('RESEND_API_KEY')}',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'from': 'Aurasphere CRM <invoices@aura-sphere.app>', // ← Your verified domain
-          'to': [toEmail],
+      _logger.i('📧 Sending payment reminder via Edge Function...');
+      
+      // Call Supabase Edge Function instead of direct Resend API
+      final response = await supabase.functions.invoke(
+        'send-email',
+        body: {
+          'to': toEmail,
           'subject': _getSubject(language, invoiceNumber),
           'html': _getHtmlBody(language, invoiceNumber, amount, currency, dueDate),
-        }),
+          'replyTo': 'support@aura-sphere.app',
+        },
       );
+
+      // Response from Supabase Edge Functions is returned as dynamic
+      final success = response != null;
       
-      return response.statusCode == 200;
+      if (success) {
+        _logger.i('✅ Email sent successfully');
+      } else {
+        _logger.w('⚠️ Email send failed');
+      }
+      
+      return success;
     } catch (e) {
-      _logger.e('Email error: $e');
+      _logger.e('❌ Email service error: $e');
       return false;
     }
   }

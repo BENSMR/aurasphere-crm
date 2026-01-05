@@ -15,30 +15,30 @@ class PricingPage extends StatelessWidget {
     {
       'name': 'Solo',
       'price': '\$9.99',
-      'description': '1 user • 30 jobs/month • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • All features',
+      'description': '1 user • 25 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Custom logo & colors • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • All features',
       'plan_id': 'solo_trades',
       'max_users': 1,
-      'max_jobs': 30,
+      'max_jobs': 25,
       'stripe_url': 'https://buy.stripe.com/abc123', // ← Replace with your SOLO link
       'color': 0xFF2196F3, // Blue
     },
     {
       'name': 'Team',
-      'price': '\$20',
-      'description': '3 users • 120 jobs/month • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • All features',
+      'price': '\$15',
+      'description': '3 users • 60 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Custom logo, colors & watermark • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • All features',
       'plan_id': 'small_team',
       'max_users': 3,
-      'max_jobs': 120,
+      'max_jobs': 60,
       'stripe_url': 'https://buy.stripe.com/def456', // ← Replace with your TEAM link
       'color': 0xFF3F51B5, // Indigo
     },
     {
       'name': 'Workshop',
-      'price': '\$49',
-      'description': '7 users • Unlimited jobs • Advanced invoicing • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • Dedicated support • Corporate & special requests • All features',
+      'price': '\$29',
+      'description': '7 users • 120 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Full white-label (custom logo, colors, watermark) • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • Dedicated support • API access • All features',
       'plan_id': 'workshop',
       'max_users': 7,
-      'max_jobs': 999999,
+      'max_jobs': 120,
       'stripe_url': 'https://buy.stripe.com/ghi789', // ← Replace with your WORKSHOP link
       'color': 0xFF9C27B0, // Purple
     },
@@ -61,6 +61,135 @@ class PricingPage extends StatelessWidget {
             const Text(
               'Job management built for plumbers, electricians, and contractors',
               style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            
+            // ✨ Trial & Discount Banners
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F7FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF2196F3), width: 2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          '✨ FREE TRIAL',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF9800),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          '50% OFF 2 MONTHS',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    '🎉 Start with 7 days FREE • No credit card required!',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1976D2),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'After trial ends, save 20% with annual billing on any plan',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Start Free Trial Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/sign-up');
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Start Free Trial (7 Days)',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            
+            // Domain & Email Included Banner
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF10B981), width: 2),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.verified, color: Color(0xFF10B981), size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          '🎁 Custom Domain Name & Email Included',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF059669),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Get a professional business domain and email with every plan—no extra cost!',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF059669),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 32),
             
@@ -102,7 +231,7 @@ class PricingPage extends StatelessWidget {
                     DataColumn(label: Text('Workshop')),
                   ],
                   rows: [
-                    _buildFeatureRow('Jobs/Month', '30', '120', 'Unlimited'),
+                    _buildFeatureRow('Jobs/Month', '25', '60', 'Unlimited'),
                     _buildFeatureRow('Team Members', '1', '3', '7'),
                     _buildFeatureRow('Advanced Invoicing', '✓', '✓', '✓'),
                     _buildFeatureRow('SMS Notifications', '✓', '✓', '✓'),
@@ -183,6 +312,10 @@ class PricingPage extends StatelessWidget {
     int maxUsers,
     Color accentColor,
   ) {
+    // Calculate annual price with 20% discount
+    final basePriceNum = double.parse(price.replaceAll('\$', '').replaceAll(',', ''));
+    final annualPrice = (basePriceNum * 12 * 0.8).toStringAsFixed(2);
+    
     return Card(
       elevation: 4,
       child: Padding(
@@ -190,28 +323,77 @@ class PricingPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: accentColor,
-              ),
-            ),
-            const SizedBox(height: 12),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  price,
+                  title,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: accentColor,
                   ),
                 ),
-                const Text(
-                  '/month',
-                  style: TextStyle(fontSize: 14),
+                // Popular badge for Team plan
+                if (title == 'Team')
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text(
+                      '⭐ POPULAR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      price,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
+                    ),
+                    const Text(
+                      '/month',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                // Show annual pricing discount
+                Row(
+                  children: [
+                    const Text(
+                      '💰 Annual billing: ',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    Text(
+                      '\$$annualPrice/year',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFFF9800),
+                      ),
+                    ),
+                    const Text(
+                      ' (20% off)',
+                      style: TextStyle(fontSize: 12, color: Color(0xFFFF9800)),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -236,7 +418,18 @@ class PricingPage extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () => _handleSubscription(context, title, planId, maxUsers, stripeUrl),
-                child: const Text('Subscribe Now', style: TextStyle(fontSize: 16)),
+                child: const Text('Start 3-Day Free Trial', style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                '✓ No credit card required',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.green[700],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -252,7 +445,7 @@ class PricingPage extends StatelessWidget {
     int maxUsers,
     String stripeUrl,
   ) async {
-    // Create organization first
+    // Start trial instead of requiring payment
     try {
       final userId = supabase.auth.currentUser?.id;
       if (userId == null) {
@@ -262,12 +455,27 @@ class PricingPage extends StatelessWidget {
         return;
       }
 
+      // Show loading dialog
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
       // Create organization
       final orgData = await supabase.from('organizations').insert({
         'owner_id': userId,
         'name': 'My Workshop',
         'plan': planId,
         'max_users': maxUsers,
+        'is_trial_active': true,
+        'trial_ends_at': DateTime.now().add(const Duration(days: 3)).toIso8601String(),
+        'discount_percentage': 50.0,
+        'discount_ends_at': DateTime.now().add(const Duration(days: 60)).toIso8601String(),
       }).select().single();
 
       // Add owner as first member
@@ -277,24 +485,89 @@ class PricingPage extends StatelessWidget {
         'role': 'owner',
       });
 
-      // Notify parent widget
-      onOrganizationCreated?.call();
+      // Create subscription record
+      await supabase.from('subscriptions').insert({
+        'org_id': orgData['id'],
+        'user_id': userId,
+        'plan': planId,
+        'status': 'trial',
+        'trial_started_at': DateTime.now().toIso8601String(),
+        'trial_ends_at': DateTime.now().add(const Duration(days: 3)).toIso8601String(),
+        'trial_used': false,
+        'discount_percentage': 50.0,
+        'discount_months_remaining': 2,
+        'discount_applied_at': DateTime.now().toIso8601String(),
+        'discount_ends_at': DateTime.now().add(const Duration(days: 60)).toIso8601String(),
+      });
 
-      // Open Stripe payment
-      await _launchURL(stripeUrl);
-
+      // Close loading dialog
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Organization created! Complete payment to activate.'),
-            backgroundColor: Colors.green,
+        Navigator.pop(context);
+      }
+
+      // Show success message
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('🎉 Trial Started!'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Your 3-day free trial has been activated.',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  '✨ What you get:',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  '• Full access to all features',
+                  style: const TextStyle(fontSize: 12),
+                ),
+                const Text(
+                  '• No credit card required',
+                  style: TextStyle(fontSize: 12),
+                ),
+                const Text(
+                  '• 50% off for the first 2 months after trial',
+                  style: TextStyle(fontSize: 12),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Trial expires: ${DateTime.now().add(const Duration(days: 3)).toLocal().toString().split('.')[0]}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.orange[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushReplacementNamed(context, '/dashboard');
+                },
+                child: const Text('Start Using AuraSphere'),
+              ),
+            ],
           ),
         );
       }
     } catch (e) {
       if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog if shown
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating organization: $e')),
+          SnackBar(content: Text('Error starting trial: $e')),
         );
       }
     }

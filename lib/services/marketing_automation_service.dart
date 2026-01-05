@@ -70,7 +70,7 @@ class MarketingAutomationService {
       _logger.i('✅ Welcome flow created for: $clientEmail');
 
       return {
-        'flow_id': '${orgId}_${clientEmail}',
+        'flow_id': '${orgId}_$clientEmail',
         'type': 'welcome_sequence',
         'status': 'active',
         'total_emails': 4,

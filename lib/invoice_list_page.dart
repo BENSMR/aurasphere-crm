@@ -190,7 +190,7 @@ class _InvoiceListPageState extends State<InvoiceListPage> {
                 final pdfBytes = await pdfFile.readAsBytes();
                 await supabase.storage
                     .from('invoices')
-                    .uploadBinary('invoice_\.pdf', pdfBytes);
+                    .uploadBinary('invoice_.pdf', pdfBytes);
 
                 // Update invoice with PDF URL
                 await supabase.from('invoices').update({

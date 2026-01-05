@@ -1,5 +1,7 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+// lib/services/autonomous_ai_agents_service.dart
+// Stub - disabled
 import 'package:logger/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _logger = Logger();
 
@@ -236,7 +238,7 @@ class AutonomousAIAgentsService {
       // Generate financial recommendations
       List<String> recommendations = [];
       if (totalOverdue > 0) {
-        recommendations.add('⚠️ $${totalOverdue.toStringAsFixed(2)} in overdue payments. Send collection reminders.');
+        recommendations.add('⚠️ \$${totalOverdue.toStringAsFixed(2)} in overdue payments. Send collection reminders.');
       }
       if (avgDaysOutstanding > 30) {
         recommendations.add('📅 Average days outstanding: ${avgDaysOutstanding.toStringAsFixed(0)}. Consider stricter payment terms.');

@@ -28,16 +28,27 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _checkAuth();
-    _loadDashboardData();
   }
 
   Future<void> _checkAuth() async {
+    // Wait for auth to be ready (important for web sessions)
+    await Future.delayed(const Duration(milliseconds: 500));
+    
     final user = supabase.auth.currentUser;
-    if (user == null) {
+    final session = supabase.auth.currentSession;
+    
+    print('🔍 Dashboard Auth Check - User: ${user?.email}, Session: ${session != null}');
+    
+    if (user == null || session == null) {
+      print('❌ No auth found, redirecting to sign-in');
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/sign-in');
       }
+      return;
     }
+    
+    print('✅ Auth verified, loading dashboard data');
+    _loadDashboardData();
   }
 
   Future<void> _loadDashboardData() async {
@@ -386,7 +397,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final metrics = [
       MetricData('Total Revenue', _totalRevenue, 'This month', Icons.trending_up, const Color(0xFF4CAF50)),
       MetricData('Active Jobs', _activeJobs, 'In progress', Icons.work_outline, const Color(0xFF2196F3)),
-      MetricData('Pending Invoices', _pendingInvoices, 'Worth ${_pendingInvoices} items', Icons.receipt_long, const Color(0xFFFF9800)),
+      MetricData('Pending Invoices', _pendingInvoices, 'Worth $_pendingInvoices items', Icons.receipt_long, const Color(0xFFFF9800)),
       MetricData('Team Members', _teamMembers, 'All active', Icons.people_outline, const Color(0xFF9C27B0)),
       MetricData('Completion Rate', _completionRate, 'This month', Icons.check_circle_outline, const Color(0xFF009688)),
       MetricData('Avg Invoice', _avgInvoice, 'Per invoice', Icons.payments_outlined, const Color(0xFF3F51B5)),

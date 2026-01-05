@@ -3,13 +3,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as crypto from "https://deno.land/std@0.208.0/crypto/mod.ts";
 
 // Initialize Supabase
-const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "") as string;
+const supabaseServiceKey = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "") as string;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Facebook Configuration
-const FACEBOOK_APP_SECRET = Deno.env.get("FACEBOOK_APP_SECRET")!;
-const FACEBOOK_ACCESS_TOKEN = Deno.env.get("FACEBOOK_ACCESS_TOKEN")!;
+const FACEBOOK_APP_SECRET = (Deno.env.get("FACEBOOK_APP_SECRET") || "") as string;
+const FACEBOOK_ACCESS_TOKEN = (Deno.env.get("FACEBOOK_ACCESS_TOKEN") || "") as string;
 const FACEBOOK_API_VERSION = "v18.0";
 
 interface FacebookLead {
@@ -178,7 +178,7 @@ serve(async (req: Request) => {
     const verifyToken = url.searchParams.get("hub.verify_token");
 
     // Use WHATSAPP_WEBHOOK_VERIFY_TOKEN from env (same as WhatsApp setup)
-    const expectedToken = Deno.env.get("WHATSAPP_WEBHOOK_VERIFY_TOKEN");
+  const expectedToken = Deno.env.get("WHATSAPP_WEBHOOK_VERIFY_TOKEN") || "";
 
     if (mode === "subscribe" && verifyToken === expectedToken) {
       console.log("✅ Webhook verified");

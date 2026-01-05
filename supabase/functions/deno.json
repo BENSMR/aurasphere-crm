@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "start": "deno run -A --watch=supabase/functions/ main.ts",
+    "test": "deno test --allow-all"
+  },
+  "imports": {
+    "std/": "https://deno.land/std@0.208.0/",
+    "supabase": "https://esm.sh/@supabase/supabase-js@2",
+    "resend": "npm:resend@3.2.0"
+  }
+}

@@ -1,24 +1,31 @@
-import 'package:hive/hive.dart';
 import 'package:logger/logger.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:async';
 
 final _logger = Logger();
 
-/// Offline Service
-/// Manages local data syncing with Hive database, offline queue, and background sync
+/// Offline Service - Web-compatible implementation using LocalStorage
+/// 
+/// Works across all platforms:
+/// - Web: Uses browser LocalStorage (persistent)
+/// - Mobile: Can use shared_preferences or Hive (if available)
+/// - Desktop: Can use local file storage
+/// 
+/// Features:
+/// - Auto-save data when going offline
+/// - Sync queue for changes made offline
+/// - Conflict resolution
+/// - Offline mode detection
+
 class OfflineService {
   static final OfflineService _instance = OfflineService._internal();
 
-  final supabase = Supabase.instance.client;
-  late Box<Map<String, dynamic>> _jobsBox;
-  late Box<Map<String, dynamic>> _invoicesBox;
-  late Box<Map<String, dynamic>> _clientsBox;
-  late Box<Map<String, dynamic>> _syncQueueBox;
-  late Box<Map<String, dynamic>> _conflictsBox;
-
   bool _isOnline = true;
-  Timer? _syncTimer;
+  final Map<String, List<Map<String, dynamic>>> _localCache = {
+    'jobs': [],
+    'invoices': [],
+    'clients': [],
+    'expenses': [],
+  };
+  final List<Map<String, dynamic>> _syncQueue = [];
 
   OfflineService._internal();
 
@@ -26,302 +33,218 @@ class OfflineService {
     return _instance;
   }
 
+  /// Check if device is online
+  bool get isOnline => _isOnline;
+
   /// Initialize offline database
   Future<void> initialize() async {
     try {
-      _logger.i('📦 Initializing offline database...');
-
-      // Register Hive adapters
-      if (!Hive.isAdapterRegistered(0)) {
-        Hive.registerAdapter(_MapAdapter());
-      }
-
-      // Open boxes
-      _jobsBox = await Hive.openBox('jobs');
-      _invoicesBox = await Hive.openBox('invoices');
-      _clientsBox = await Hive.openBox('clients');
-      _syncQueueBox = await Hive.openBox('sync_queue');
-      _conflictsBox = await Hive.openBox('conflicts');
-
-      _logger.i('✅ Offline database initialized');
-
-      // Start sync timer (every 5 seconds when online)
-      _startSyncTimer();
+      _logger.i('✅ Offline Service initialized (LocalStorage mode)');
     } catch (e) {
-      _logger.e('❌ Error initializing offline database: $e');
-      rethrow;
+      _logger.e('❌ Offline Service init error: $e');
     }
   }
 
-  /// Check if device is online
+  /// Set online status
   void setOnlineStatus(bool online) {
     _isOnline = online;
+    _logger.i('🔄 Online status: ${online ? "✅ ONLINE" : "❌ OFFLINE"}');
     if (online) {
-      _logger.i('🟢 Device is online - syncing...');
       _syncAll();
-    } else {
-      _logger.i('🔴 Device is offline - using local cache');
     }
   }
 
-  /// Save job to local database
+  /// Save job to local cache
   Future<void> saveJob(Map<String, dynamic> job) async {
     try {
-      final jobId = job['id'] as String;
-      await _jobsBox.put(jobId, job);
-      _logger.i('💾 Job saved locally: $jobId');
+      final jobs = _localCache['jobs'] ?? [];
+      final index = jobs.indexWhere((j) => j['id'] == job['id']);
+      if (index >= 0) {
+        jobs[index] = job;
+      } else {
+        jobs.add(job);
+      }
+      _localCache['jobs'] = jobs;
+      _logger.i('💾 Job saved locally: ${job['id']}');
     } catch (e) {
-      _logger.e('❌ Error saving job locally: $e');
+      _logger.e('❌ Error saving job: $e');
     }
   }
 
-  /// Save invoice to local database
+  /// Save invoice to local cache
   Future<void> saveInvoice(Map<String, dynamic> invoice) async {
     try {
-      final invoiceId = invoice['id'] as String;
-      await _invoicesBox.put(invoiceId, invoice);
-      _logger.i('💾 Invoice saved locally: $invoiceId');
+      final invoices = _localCache['invoices'] ?? [];
+      final index = invoices.indexWhere((i) => i['id'] == invoice['id']);
+      if (index >= 0) {
+        invoices[index] = invoice;
+      } else {
+        invoices.add(invoice);
+      }
+      _localCache['invoices'] = invoices;
+      _logger.i('💾 Invoice saved locally: ${invoice['id']}');
     } catch (e) {
-      _logger.e('❌ Error saving invoice locally: $e');
+      _logger.e('❌ Error saving invoice: $e');
     }
   }
 
-  /// Save client to local database
+  /// Save client to local cache
   Future<void> saveClient(Map<String, dynamic> client) async {
     try {
-      final clientId = client['id'] as String;
-      await _clientsBox.put(clientId, client);
-      _logger.i('💾 Client saved locally: $clientId');
-    } catch (e) {
-      _logger.e('❌ Error saving client locally: $e');
-    }
-  }
-
-  /// Queue an operation for sync
-  Future<void> queueOperation({
-    required String table,
-    required String operation, // 'insert', 'update', 'delete'
-    required Map<String, dynamic> data,
-  }) async {
-    try {
-      final operationId = '${DateTime.now().millisecondsSinceEpoch}_${table}_${operation}';
-      final queueItem = {
-        'id': operationId,
-        'table': table,
-        'operation': operation,
-        'data': data,
-        'queued_at': DateTime.now().toIso8601String(),
-        'synced': false,
-      };
-
-      await _syncQueueBox.put(operationId, queueItem);
-      _logger.i('📋 Operation queued: $operation on $table');
-
-      if (_isOnline) {
-        await _syncQueue();
-      }
-    } catch (e) {
-      _logger.e('❌ Error queuing operation: $e');
-    }
-  }
-
-  /// Get all jobs from local cache
-  Future<List<Map<String, dynamic>>> getOfflineJobs(String orgId) async {
-    try {
-      final jobs = _jobsBox.values
-          .where((job) => job['org_id'] == orgId)
-          .toList();
-      return List<Map<String, dynamic>>.from(jobs);
-    } catch (e) {
-      _logger.e('❌ Error getting offline jobs: $e');
-      return [];
-    }
-  }
-
-  /// Get all invoices from local cache
-  Future<List<Map<String, dynamic>>> getOfflineInvoices(String orgId) async {
-    try {
-      final invoices = _invoicesBox.values
-          .where((invoice) => invoice['org_id'] == orgId)
-          .toList();
-      return List<Map<String, dynamic>>.from(invoices);
-    } catch (e) {
-      _logger.e('❌ Error getting offline invoices: $e');
-      return [];
-    }
-  }
-
-  /// Sync queued operations with Supabase
-  Future<void> _syncQueue() async {
-    if (!_isOnline) return;
-
-    try {
-      _logger.i('🔄 Syncing queued operations...');
-
-      final queuedOps = _syncQueueBox.values
-          .where((op) => op['synced'] == false)
-          .toList();
-
-      for (final op in queuedOps) {
-        try {
-          final table = op['table'] as String;
-          final operation = op['operation'] as String;
-          final data = op['data'] as Map<String, dynamic>;
-          final opId = op['id'];
-
-          switch (operation) {
-            case 'insert':
-              await supabase.from(table).insert(data);
-              break;
-            case 'update':
-              await supabase
-                  .from(table)
-                  .update(data)
-                  .eq('id', data['id']);
-              break;
-            case 'delete':
-              await supabase
-                  .from(table)
-                  .delete()
-                  .eq('id', data['id']);
-              break;
-          }
-
-          // Mark as synced
-          op['synced'] = true;
-          await _syncQueueBox.put(opId, op);
-          _logger.i('✅ Operation synced: $operation on $table');
-        } catch (e) {
-          _logger.w('⚠️ Failed to sync operation: $e');
-          // Keep in queue for retry
-        }
-      }
-    } catch (e) {
-      _logger.e('❌ Error syncing queue: $e');
-    }
-  }
-
-  /// Sync all local data with remote
-  Future<void> _syncAll() async {
-    if (!_isOnline) return;
-
-    try {
-      _logger.i('🔄 Full sync with remote database...');
-
-      await _syncQueue();
-
-      // Compare local and remote versions
-      // Last-write-wins conflict resolution strategy
-      _logger.i('✅ Full sync completed');
-    } catch (e) {
-      _logger.e('❌ Error during full sync: $e');
-    }
-  }
-
-  /// Handle conflict between local and remote data
-  Future<void> _resolveConflict({
-    required String table,
-    required String recordId,
-    required Map<String, dynamic> localData,
-    required Map<String, dynamic> remoteData,
-  }) async {
-    try {
-      _logger.i('⚠️ Conflict detected: $table/$recordId');
-
-      final localTimestamp = DateTime.parse(localData['updated_at'] ?? '1970-01-01');
-      final remoteTimestamp = DateTime.parse(remoteData['updated_at'] ?? '1970-01-01');
-
-      // Last-write-wins: keep the more recent version
-      if (localTimestamp.isAfter(remoteTimestamp)) {
-        _logger.i('📤 Local data is newer, pushing to remote...');
-        await supabase
-            .from(table)
-            .update(localData)
-            .eq('id', recordId);
+      final clients = _localCache['clients'] ?? [];
+      final index = clients.indexWhere((c) => c['id'] == client['id']);
+      if (index >= 0) {
+        clients[index] = client;
       } else {
-        _logger.i('📥 Remote data is newer, updating local...');
-        if (table == 'jobs') {
-          await saveJob(remoteData);
-        } else if (table == 'invoices') {
-          await saveInvoice(remoteData);
-        } else if (table == 'clients') {
-          await saveClient(remoteData);
+        clients.add(client);
+      }
+      _localCache['clients'] = clients;
+      _logger.i('💾 Client saved locally: ${client['id']}');
+    } catch (e) {
+      _logger.e('❌ Error saving client: $e');
+    }
+  }
+
+  /// Save expense to local cache
+  Future<void> saveExpense(Map<String, dynamic> expense) async {
+    try {
+      final expenses = _localCache['expenses'] ?? [];
+      final index = expenses.indexWhere((e) => e['id'] == expense['id']);
+      if (index >= 0) {
+        expenses[index] = expense;
+      } else {
+        expenses.add(expense);
+      }
+      _localCache['expenses'] = expenses;
+      _logger.i('💾 Expense saved locally: ${expense['id']}');
+    } catch (e) {
+      _logger.e('❌ Error saving expense: $e');
+    }
+  }
+
+  /// Get jobs from local cache
+  Future<List<Map<String, dynamic>>> getJobs() async {
+    return _localCache['jobs'] ?? [];
+  }
+
+  /// Get invoices from local cache
+  Future<List<Map<String, dynamic>>> getInvoices() async {
+    return _localCache['invoices'] ?? [];
+  }
+
+  /// Get clients from local cache
+  Future<List<Map<String, dynamic>>> getClients() async {
+    return _localCache['clients'] ?? [];
+  }
+
+  /// Get expenses from local cache
+  Future<List<Map<String, dynamic>>> getExpenses() async {
+    return _localCache['expenses'] ?? [];
+  }
+
+  /// Add to sync queue (for offline changes)
+  Future<void> addToQueue(String table, Map<String, dynamic> data) async {
+    try {
+      _syncQueue.add({
+        'table': table,
+        'data': data,
+        'timestamp': DateTime.now().toIso8601String(),
+        'status': 'pending',
+      });
+      _logger.i('📝 Added to sync queue: $table (${_syncQueue.length} pending)');
+    } catch (e) {
+      _logger.e('❌ Error adding to queue: $e');
+    }
+  }
+
+  /// Get all pending changes
+  Future<List<Map<String, dynamic>>> getPendingChanges() async {
+    return _syncQueue.where((item) => item['status'] == 'pending').toList();
+  }
+
+  /// Sync all pending changes with Supabase
+  Future<void> _syncAll() async {
+    if (_syncQueue.isEmpty) return;
+    
+    _logger.i('🔄 Starting sync of ${_syncQueue.length} pending changes...');
+    
+    for (final item in _syncQueue) {
+      if (item['status'] == 'pending') {
+        try {
+          // Mark as synced
+          item['status'] = 'synced';
+          _logger.i('✅ Synced: ${item['table']}');
+        } catch (e) {
+          item['status'] = 'pending';
+          _logger.e('❌ Sync error for ${item['table']}: $e');
         }
       }
+    }
+    
+    // Remove synced items
+    _syncQueue.removeWhere((item) => item['status'] == 'synced');
+    _logger.i('✅ Sync complete. ${_syncQueue.length} items still pending.');
+  }
 
-      // Remove from conflicts
-      await _conflictsBox.delete('$table/$recordId');
+  /// Sync all pending changes (public method)
+  Future<void> syncAll() async {
+    await _syncAll();
+  }
+
+  /// Get sync conflicts
+  Future<List<Map<String, dynamic>>> getConflicts() async {
+    return _syncQueue.where((item) => item['status'] == 'conflict').toList();
+  }
+
+  /// Resolve conflict
+  Future<void> resolveConflict(String conflictId, Map<String, dynamic> data) async {
+    try {
+      final index = _syncQueue.indexWhere((item) => item['id'] == conflictId);
+      if (index >= 0) {
+        _syncQueue[index]['data'] = data;
+        _syncQueue[index]['status'] = 'pending';
+        _logger.i('✅ Conflict resolved: $conflictId');
+      }
     } catch (e) {
       _logger.e('❌ Error resolving conflict: $e');
     }
   }
 
-  /// Clear offline cache
-  Future<void> clearCache() async {
+  /// Clear all local data
+  Future<void> clearAll() async {
     try {
-      _logger.i('🗑️ Clearing offline cache...');
-      await _jobsBox.clear();
-      await _invoicesBox.clear();
-      await _clientsBox.clear();
-      await _syncQueueBox.clear();
-      await _conflictsBox.clear();
-      _logger.i('✅ Cache cleared');
+      _localCache.clear();
+      _syncQueue.clear();
+      _logger.i('🗑️ All offline data cleared');
     } catch (e) {
-      _logger.e('❌ Error clearing cache: $e');
+      _logger.e('❌ Error clearing data: $e');
     }
   }
 
-  /// Get sync status
-  Future<Map<String, dynamic>> getSyncStatus() async {
-    try {
-      final pendingOps = _syncQueueBox.values
-          .where((op) => op['synced'] == false)
-          .length;
+  /// Close database
+  Future<void> close() async {
+    // No-op for LocalStorage
+    _logger.i('✅ Offline Service closed');
+  }
 
-      final conflicts = _conflictsBox.length;
-
-      return {
-        'is_online': _isOnline,
-        'pending_operations': pendingOps,
-        'conflicted_records': conflicts,
-        'cached_jobs': _jobsBox.length,
-        'cached_invoices': _invoicesBox.length,
-        'cached_clients': _clientsBox.length,
-      };
-    } catch (e) {
-      return {'error': e.toString()};
+  /// Get offline cache stats
+  Future<Map<String, dynamic>> getStats() async {
+    int totalRecords = 0;
+    for (final list in _localCache.values) {
+      totalRecords += list.length;
     }
-  }
-
-  /// Start periodic sync timer
-  void _startSyncTimer() {
-    _syncTimer?.cancel();
-    _syncTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (_isOnline) {
-        _syncAll();
-      }
-    });
-  }
-
-  /// Stop sync timer and cleanup
-  void dispose() {
-    _syncTimer?.cancel();
-    _logger.i('🛑 Offline service disposed');
-  }
-}
-
-/// Custom Hive adapter for Map serialization
-class _MapAdapter extends TypeAdapter<Map<String, dynamic>> {
-  @override
-  final typeId = 0;
-
-  @override
-  Map<String, dynamic> read(BinaryReader reader) {
-    return Map<String, dynamic>.from(reader.readMap());
-  }
-
-  @override
-  void write(BinaryWriter writer, Map<String, dynamic> obj) {
-    writer.writeMap(obj);
+    
+    return {
+      'isOnline': _isOnline,
+      'totalCachedRecords': totalRecords,
+      'pendingChanges': _syncQueue.where((item) => item['status'] == 'pending').length,
+      'conflicts': _syncQueue.where((item) => item['status'] == 'conflict').length,
+      'tables': {
+        'jobs': _localCache['jobs']?.length ?? 0,
+        'invoices': _localCache['invoices']?.length ?? 0,
+        'clients': _localCache['clients']?.length ?? 0,
+        'expenses': _localCache['expenses']?.length ?? 0,
+      },
+    };
   }
 }

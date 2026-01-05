@@ -30,4 +30,14 @@ class EnvLoader {
   static String get(String key) {
     return _env[key] ?? '';
   }
+
+  /// Check if API key is configured
+  static bool isApiKeyConfigured(String apiName) {
+    return _env['${apiName}_API_KEY']?.isNotEmpty ?? false;
+  }
+
+  /// Set API key dynamically (useful for Supabase Edge Function integration)
+  static void setApiKey(String apiName, String key) {
+    _env['${apiName}_API_KEY'] = key;
+  }
 }

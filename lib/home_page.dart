@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'job_list_page.dart';
 import 'pricing_page.dart';
 import 'inventory_page.dart';
@@ -12,8 +11,10 @@ import 'technician_dashboard_page.dart';
 import 'client_list_page.dart';
 import 'lead_import_page.dart';
 import 'performance_page.dart';
-import 'services/lead_agent_service.dart';
-import 'services/feature_personalization_helper.dart';
+import 'aura_chat_page.dart';
+import 'ai_automation_settings_page.dart';
+// import 'services/lead_agent_service.dart';
+// import 'services/feature_personalization_helper.dart';
 
 final _logger = Logger();
 
@@ -35,23 +36,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _checkAuth(); // Add auth check first
+    _checkAuth();
     _checkSubscription();
-    _runDailyAutomation();
-    _initializeFeaturePersonalization();
-  }
-
-  Future<void> _initializeFeaturePersonalization() async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId != null) {
-        await FeaturePersonalizationHelper().initializeForNewUser(userId);
-        _logger.i('✅ Feature personalization loaded');
-      }
-    } catch (e) {
-      _logger.e('⚠️ Feature personalization load failed: $e');
-      // Non-critical, don't block page load
-    }
   }
 
   Future<void> _checkAuth() async {
@@ -64,22 +50,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _runDailyAutomation() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastRun = prefs.getString('last_automation_run');
-      final today = DateTime.now();
-      final todayKey = '${today.year}-${today.month}-${today.day}';
-      
-      // Run once per day at 9 AM or later
-      if (lastRun != todayKey && today.hour >= 9) {
-        _logger.d('🤖 Running daily automation tasks...');
-        await LeadAgentService().runDailyTasks();
-        await prefs.setString('last_automation_run', todayKey);
-        _logger.i('✅ Automation complete');
-      }
-    } catch (e) {
-      _logger.e('❌ Automation error: $e');
-    }
+    // Automation moved to backend - no-op here
   }
 
   Future<void> _checkSubscription() async {
@@ -167,7 +138,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildWorkshopView() {
     return DefaultTabController(
-      length: 6, // Jobs, Leads, Inventory, Dispatch, Performance, Team
+      length: 8, // Jobs, Leads, Inventory, Dispatch, Performance, Team, Suppliers, AI Chat
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -190,6 +161,15 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'AI Automation Settings',
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => const AIAutomationSettingsPage(),
+                ));
+              },
+            ),
             TextButton.icon(
               onPressed: () async {
                 await Supabase.instance.client.auth.signOut();
@@ -203,6 +183,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: 16),
           ],
           bottom: const TabBar(
+            isScrollable: false,
             tabs: [
               Tab(icon: Icon(Icons.work), text: 'Jobs'),
               Tab(icon: Icon(Icons.people), text: 'Leads'),
@@ -210,23 +191,195 @@ class _HomePageState extends State<HomePage> {
               Tab(icon: Icon(Icons.local_shipping), text: 'Dispatch'),
               Tab(icon: Icon(Icons.analytics), text: 'Performance'),
               Tab(icon: Icon(Icons.group), text: 'Team'),
+              Tab(icon: Icon(Icons.business), text: 'Suppliers'),
+              Tab(icon: Icon(Icons.smart_toy), text: 'AI Chat'),
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            JobListPage(),
-            LeadImportPage(),
-            InventoryPage(),
-            DispatchPage(),
-            PerformancePage(),
-            TeamPage(),
+            const JobListPage(),
+            const LeadImportPage(),
+            const InventoryPage(),
+            const DispatchPage(),
+            const PerformancePage(),
+            const TeamPage(),
+            _buildSupplierTab(),
+            _buildAiChatTab(),
           ],
         ),
       ),
     );
   }
 
+  // NEW SUPPLIER TAB
+  Widget _buildSupplierTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.business, size: 64, color: Colors.blue),
+          const SizedBox(height: 16),
+          const Text(
+            'Supplier Management Hub',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '🤖 AI-powered supplier control, pricing optimization & PO management',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/suppliers');
+            },
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Open Supplier Hub'),
+          ),
+        ],
+      ),
+    );
+  }
+  // AI CHAT TAB - 5 AI Agents
+  Widget _buildAiChatTab() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            const Icon(Icons.smart_toy, size: 64, color: Colors.blueAccent),
+            const SizedBox(height: 16),
+            const Text(
+              'AuraSphere AI Agents',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Your personal team of AI specialists. Choose an agent to get started.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 24),
+            // CFO Agent
+            _buildAiAgentCard(
+              title: '💰 CFO Agent',
+              description: 'Financial analysis, invoicing, tax compliance & budgeting',
+              color: Colors.green,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuraChatPage(selectedAgent: 'cfo'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // CEO Agent
+            _buildAiAgentCard(
+              title: '🎯 CEO Agent',
+              description: 'Business strategy, KPI analysis, growth recommendations',
+              color: Colors.blue,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuraChatPage(selectedAgent: 'ceo'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Marketing Agent
+            _buildAiAgentCard(
+              title: '📢 Marketing Agent',
+              description: 'Campaign automation, lead generation, brand messaging',
+              color: Colors.orange,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuraChatPage(selectedAgent: 'marketing'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Sales Agent
+            _buildAiAgentCard(
+              title: '💼 Sales Agent',
+              description: 'Lead qualification, pipeline management, deal tracking',
+              color: Colors.purple,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuraChatPage(selectedAgent: 'sales'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Admin Agent
+            _buildAiAgentCard(
+              title: '⚙️ Admin Agent',
+              description: 'Team management, permissions, system configuration',
+              color: Colors.red,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AuraChatPage(selectedAgent: 'admin'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper widget for AI agent cards
+  Widget _buildAiAgentCard({
+    required String title,
+    required String description,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 2,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(width: 4, color: color),
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                description,
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: onTap,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Open'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;

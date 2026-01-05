@@ -2,9 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/aura_ai_service.dart';
+import 'services/ai_automation_service.dart';
 
 class AuraChatPage extends StatefulWidget {
-  const AuraChatPage({super.key});
+  final String? selectedAgent; // Optional: pre-select an agent
+  const AuraChatPage({this.selectedAgent, super.key});
 
   @override
   State<AuraChatPage> createState() => _AuraChatPageState();
@@ -16,16 +18,30 @@ class _AuraChatPageState extends State<AuraChatPage> {
   final _messages = <Map<String, dynamic>>[];
   String _userLang = 'en';
   final supabase = Supabase.instance.client;
+  final automationService = AIAutomationService();
+  String? _selectedAgent; // Track selected agent
+  String? _orgId;
 
   @override
   void initState() {
     super.initState();
+    _selectedAgent = widget.selectedAgent;
     if (supabase.auth.currentUser == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/');
       });
     } else {
-      _loadUserLanguage();
+      _initializeChat();
+    }
+  }
+
+  Future<void> _initializeChat() async {
+    try {
+      final org = await supabase.from('organizations').select('id').single();
+      _orgId = org['id'];
+      await _loadUserLanguage();
+    } catch (e) {
+      print('❌ Error initializing chat: $e');
     }
   }
 
@@ -122,6 +138,24 @@ class _AuraChatPageState extends State<AuraChatPage> {
     }
 
     try {
+      // Check if agent is enabled and quotas are respected
+      if (_orgId != null && _selectedAgent != null) {
+        final quotaCheck = await automationService.checkCallAllowed(
+          orgId: _orgId!,
+          agentName: _selectedAgent!,
+        );
+
+        if (!quotaCheck['allowed']) {
+          if (mounted) {
+            setState(() {
+              _messages.removeLast(); // Remove "..." message
+            });
+          }
+          _addMessage('⚠️ ${quotaCheck['reason']}', false);
+          return;
+        }
+      }
+
       // Process with AI agent
       final command = await AuraAiService.parseCommand(input, _userLang);
       
@@ -132,6 +166,17 @@ class _AuraChatPageState extends State<AuraChatPage> {
           setState(() {
             _messages.removeLast(); // Remove "..." message
           });
+        }
+
+        // Log the API call for cost tracking
+        if (_orgId != null && _selectedAgent != null) {
+          await automationService.logApiCall(
+            orgId: _orgId!,
+            agentName: _selectedAgent!,
+            action: command['action'] ?? 'unknown',
+            tokensUsed: 150, // Estimate
+            estimatedCost: 0.001, // Estimate
+          );
         }
 
         if (result['success'] == true) {
@@ -184,6 +229,124 @@ class _AuraChatPageState extends State<AuraChatPage> {
     }
   }
 
+  // AI Agents configuration
+  Map<String, Map<String, dynamic>> get _agents => {
+    'cfo': {
+      'title': '💰 CFO Agent',
+      'description': 'Financial analysis, invoicing, tax compliance & budgeting',
+      'color': Colors.green,
+      'subtitle': 'Chief Financial Officer'
+    },
+    'ceo': {
+      'title': '🎯 CEO Agent',
+      'description': 'Business strategy, KPI analysis, growth recommendations',
+      'color': Colors.blue,
+      'subtitle': 'Chief Executive Officer'
+    },
+    'marketing': {
+      'title': '📢 Marketing Agent',
+      'description': 'Campaign automation, lead generation, brand messaging',
+      'color': Colors.orange,
+      'subtitle': 'Marketing Manager'
+    },
+    'sales': {
+      'title': '💼 Sales Agent',
+      'description': 'Lead qualification, pipeline management, deal tracking',
+      'color': Colors.purple,
+      'subtitle': 'Sales Director'
+    },
+    'admin': {
+      'title': '⚙️ Admin Agent',
+      'description': 'Team management, permissions, system configuration',
+      'color': Colors.red,
+      'subtitle': 'System Administrator'
+    },
+  };
+
+  // Build agent selector
+  Widget _buildAgentSelector() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 32),
+            const Icon(Icons.smart_toy, size: 80, color: Colors.blueAccent),
+            const SizedBox(height: 24),
+            const Text(
+              'Select Your AI Agent',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Choose an AI specialist to help with your business tasks',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            const SizedBox(height: 32),
+            ..._agents.entries.map((entry) {
+              final agentKey = entry.key;
+              final agent = entry.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() => _selectedAgent = agentKey);
+                    _addMessage('✨ ${agent['subtitle']} activated. How can I help?', false);
+                  },
+                  child: Card(
+                    elevation: 2,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          left: BorderSide(width: 4, color: agent['color']),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            agent['title'],
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            agent['subtitle'],
+                            style: TextStyle(color: agent['color'], fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            agent['description'],
+                            style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                setState(() => _selectedAgent = agentKey);
+                                _addMessage('✨ ${agent['subtitle']} activated. How can I help?', false);
+                              },
+                              icon: const Icon(Icons.arrow_forward),
+                              label: const Text('Select'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Defensive auth check: prevent render if not authenticated
@@ -193,15 +356,49 @@ class _AuraChatPageState extends State<AuraChatPage> {
       );
     }
 
+    // Show agent selector if no agent selected
+    if (_selectedAgent == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Row(
+            children: [
+              Icon(Icons.smart_toy, color: Colors.white),
+              SizedBox(width: 8),
+              Text('Aura AI Agents'),
+            ],
+          ),
+        ),
+        body: _buildAgentSelector(),
+      );
+    }
+
+    // Show chat with selected agent
+    final agentInfo = _agents[_selectedAgent];
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.auto_awesome, color: Colors.white),
-            SizedBox(width: 8),
-            Text('Aura AI Assistant'),
+            const Icon(Icons.auto_awesome, color: Colors.white),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(agentInfo?['title'] ?? 'AI Assistant'),
+                Text(
+                  agentInfo?['subtitle'] ?? '',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+                ),
+              ],
+            ),
           ],
         ),
+        actions: [
+          TextButton.icon(
+            onPressed: () => setState(() => _selectedAgent = null),
+            icon: const Icon(Icons.swap_horiz, color: Colors.white),
+            label: const Text('Switch Agent', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
       body: Column(
         children: [

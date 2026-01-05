@@ -1,9 +1,6 @@
-﻿// lib/services/whatsapp_service.dart
+// lib/services/whatsapp_service.dart
 // ✅ ENHANCED: Error handling, retry logic, templates, delivery tracking
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:aura_crm/core/env_loader.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class WhatsAppService {
   static const _maxRetries = 3;

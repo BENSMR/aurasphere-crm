@@ -11,8 +11,10 @@
         "cupertino_icons",
         "encrypt",
         "flutter",
+        "flutter_dotenv",
         "flutter_localizations",
         "flutter_secure_storage",
+        "flutter_web_plugins",
         "http",
         "image_picker",
         "intl",
@@ -52,6 +54,13 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_dotenv",
+      "version": "6.0.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -216,6 +225,13 @@
         "clock",
         "meta",
         "path"
+      ]
+    },
+    {
+      "name": "flutter_web_plugins",
+      "version": "0.0.0",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
@@ -589,13 +605,6 @@
         "archive",
         "meta",
         "xml"
-      ]
-    },
-    {
-      "name": "flutter_web_plugins",
-      "version": "0.0.0",
-      "dependencies": [
-        "flutter"
       ]
     },
     {

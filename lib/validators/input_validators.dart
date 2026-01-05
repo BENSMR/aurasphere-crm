@@ -1,11 +1,12 @@
 /// Input Validation Service
 /// Provides validators for email, password, phone, and other form fields
 /// Prevents invalid data from entering the database and protects against XSS attacks
+library;
 
 class InputValidators {
   // Email regex (RFC 5322 simplified)
   static final RegExp _emailRegex = RegExp(
-    r'^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$',
+    r'^[a-zA-Z0-9.!#$%&' "'" r'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$',
   );
 
   // Phone regex (international format support)
@@ -70,7 +71,7 @@ class InputValidators {
     }
 
     // Check for at least one special character
-    if (!password.contains(RegExp(r'[!@#$%^&*()_+\-=\[\]{};:\'",.<>?/\\|`~]'))) {
+    if (!password.contains(RegExp(r'[!@#$%^&*()_+\-=\[\]{};:".<>?/\\|`~]'))) {
       return 'Password must contain at least one special character (!@#$%^&*)';
     }
 

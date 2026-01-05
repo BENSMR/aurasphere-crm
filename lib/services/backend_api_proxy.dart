@@ -8,6 +8,7 @@
 /// 1. Create Edge Functions: groq-proxy, email-proxy, ocr-proxy
 /// 2. Store API keys in Supabase secrets
 /// 3. Update these methods to call your Edge Functions instead of direct APIs
+library;
 
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
