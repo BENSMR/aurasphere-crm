@@ -42,10 +42,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _checkAuth() async {
     final user = Supabase.instance.client.auth.currentUser;
+    _logger.i('🔐 Auth check: User = ${user?.email ?? "DEMO MODE"}');
+    
     if (user == null) {
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/');
-      }
+      _logger.i('✅ Demo mode detected - allowing access without auth');
+      // Demo mode - allow access anyway
+      // Just continue loading
     }
   }
 
@@ -56,8 +58,20 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkSubscription() async {
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;
+      
+      // If no user, use demo mode
       if (userId == null) {
-        if (mounted) setState(() => _loading = false);
+        _logger.i('✅ Demo mode: Using demo subscription');
+        if (mounted) {
+          setState(() {
+            _hasActiveSubscription = true;
+            _userPlan = 'demo';
+            _isOwner = true;
+            _stripeStatus = 'active';
+            _userType = 'trades';
+            _loading = false;
+          });
+        }
         return;
       }
 

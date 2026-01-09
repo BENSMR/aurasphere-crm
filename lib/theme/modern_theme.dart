@@ -114,6 +114,16 @@ class ModernTheme {
     color: textGray,
   );
 
+  // ==================== MISSING CONSTANTS (For SettingsPage) ====================
+  static const Color lightBorder = borderGray;
+
+  static const TextStyle bodyMedium = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+    fontFamily: 'Manrope',
+    color: textDark,
+  );
+
   // ==================== SPACING ====================
   static const double spacingXS = 4;
   static const double spacingS = 8;

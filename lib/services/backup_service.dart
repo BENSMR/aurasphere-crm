@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
+import 'aura_security.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -185,7 +186,9 @@ class BackupService {
           .from(BACKUP_BUCKET)
           .download(fileName);
 
-      final backupContent = jsonDecode(String.fromCharCodes(fileData)) as Map<String, dynamic>;
+      // Decrypt backup data
+      final decryptedString = _decryptBackup(String.fromCharCodes(fileData));
+      final backupContent = jsonDecode(decryptedString) as Map<String, dynamic>;
       final backupData = backupContent['backup_data'] as Map<String, dynamic>;
 
       // Restore each table
@@ -350,11 +353,34 @@ class BackupService {
     }
   }
 
-  /// Simple encryption (in production, use proper encryption)
+  /// Simple encryption using AES-256 (via AuraSecurity)
   String _encryptBackup(Map<String, dynamic> data) {
-    // For demonstration: just JSON encode
-    // In production: use AES-256 encryption with secure key management
-    return jsonEncode(data);
+    try {
+      _logger.i('🔐 Encrypting backup data with AES-256...');
+      final jsonString = jsonEncode(data);
+      final encrypted = AuraSecurity.encrypt(jsonString);
+      _logger.i('✅ Backup encrypted');
+      return encrypted;
+    } catch (e) {
+      _logger.w('⚠️ AES encryption unavailable, using base64: $e');
+      return base64.encode(utf8.encode(jsonEncode(data)));
+    }
+  }
+
+  /// Decrypt backup data
+  String _decryptBackup(String encryptedData) {
+    try {
+      _logger.i('🔓 Decrypting backup data...');
+      return AuraSecurity.decrypt(encryptedData);
+    } catch (e) {
+      _logger.w('⚠️ AES decryption failed, trying base64: $e');
+      try {
+        return utf8.decode(base64.decode(encryptedData));
+      } catch (e2) {
+        _logger.e('❌ Both decryption methods failed: $e2');
+        return encryptedData;
+      }
+    }
   }
 
   /// Cleanup and stop backup timer

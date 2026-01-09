@@ -118,7 +118,10 @@ class SupplierAiAgent {
             }).toList(),
           ).timeout(
             const Duration(seconds: 30),
-            onTimeout: () => print('⏱️ Supplier batch analysis timeout (continuing...)'),
+            onTimeout: () {
+              print('⏱️ Supplier batch analysis timeout (continuing...)');
+              return [];
+            },
           );
           
           analyzed += suppliersToAnalyze.length;

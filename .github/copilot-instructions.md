@@ -7,19 +7,22 @@
 ### Core Stack
 - **Frontend**: Flutter (Dart) with Material Design 3 + seeded colors from `#007BFF` (Electric Blue)
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **State Management**: SetState-only (no Provider/Riverpod/BLoC)
-- **Routing**: 30+ named routes in [lib/main.dart](../lib/main.dart#L70-L105)
+- **State Management**: SetState-only (no Provider/Riverpod/BLoC) - all pages manage local state via `setState()`
+- **Routing**: Named routes in [lib/main.dart](../lib/main.dart#L46-L65) with auth guards on protected routes
 - **i18n**: Manual JSON lookup in `assets/i18n/{en,fr,it,de,es,ar,mt,bg}.json`
+- **Logging**: `package:logger/logger.dart` with emoji prefixes (use Logger in services, print() in pages for emoji logging)
 
 ### Key Directories
-- `/lib/services/` (35 files) - Business logic, API integrations, AI/automation
-- `/lib/` - Pages & widgets; one file per route
-- `/lib/features/` - Modular features (clients, suppliers); legacy location
+- `/lib/services/` (38 files) - All business logic; singleton pattern with Logger; **never contains UI code**
+- `/lib/` - Pages & widgets; one file per route (`*_page.dart` naming); manages local state only
 - `/lib/theme/` - Custom components (`ModernButton`, `ModernCard`, `ModernPageTransition`)
 - `/lib/core/` - Auth helper, env loader, app theme config
-- `/lib/widgets/` - Reusable widgets (trial banner, etc.)
+- `/lib/widgets/` - Reusable UI components (buttons, cards, forms)
 - `/lib/validators/` - Input validation helpers
-- `/supabase/` - Edge Functions (Groq AI, WhatsApp, payment webhooks)
+- `/lib/settings/` - Settings pages (team, features, account)
+- `/lib/l10n/` - i18n/localization configuration
+- `/supabase/functions/` - Deno Edge Functions (Groq AI, WhatsApp, payment webhooks, supplier agent)
+- `/supabase/migrations/` - Database schema versions
 
 ### Critical Data Flows
 
@@ -31,6 +34,7 @@
 ## Essential Patterns
 
 ### Auth Guard Pattern (Every Protected Page)
+**Option 1: Simple Guard (Recommended)**
 ```dart
 @override
 void initState() {
@@ -53,6 +57,29 @@ Widget build(BuildContext context) {
 }
 ```
 **Why both checks**: Race condition on hot reload. `initState` redirects; `build` guards state updates.
+
+**Option 2: AuthGate Pattern (For root navigation)**
+Use `AuthGate` widget in main.dart to check session in background without blocking UI:
+```dart
+class _AuthGateState extends State<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthInBackground();
+  }
+
+  Future<void> _checkAuthInBackground() async {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null && mounted) {
+      Navigator.of(context).pushReplacementNamed('/dashboard');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => const LandingPageAnimated(); // Show landing immediately
+}
+```
+**Why this pattern**: Non-blocking, fast initial render, graceful fallback if auth check fails.
 
 ### Supabase Query Pattern
 ```dart
@@ -97,14 +124,57 @@ class _PageState extends State<Page> {
 **Key**: Always `if (mounted)` before setState in finally/catch to prevent "setState after dispose" crashes.
 
 ### Logging Convention
-Use emoji prefixes for console clarity:
+**Pages**: Use `print()` with emoji prefixes for UI debugging:
 - `print('✅ Success: ...')` - Expected outcome
-- `print('❌ ERROR: $e')` - Recoverable error
+- `print('❌ Error: $e')` - Error with context
 - `print('⚠️ Warning: ...')` - Unexpected but harmless
 - `print('🔄 Processing: ...')` - Async work in progress
 - `print('🤖 AI: ...')` - AI/LLM calls
-- `print('📧 Email: ...')` - Notifications
+- `print('📧 Email: ...')` - Email notifications
 - `print('💳 Payment: ...')` - Financial transactions
+
+**Services**: Use `Logger` from `package:logger/logger.dart` instead:
+```dart
+final _logger = Logger();
+_logger.i('🔄 Processing...');  // Info
+_logger.e('Failed: $error');     // Error
+_logger.w('Warning: $msg');      // Warning
+```
+
+### Service Singleton Pattern
+All services use lazy singleton with private constructor. Pattern varies slightly:
+
+**With Logger (Recommended for business logic services):**
+```dart
+import 'package:logger/logger.dart';
+
+final _logger = Logger();
+
+class InvoiceService {
+  static final InvoiceService _instance = InvoiceService._internal();
+  final supabase = Supabase.instance.client;
+
+  InvoiceService._internal();  // Private constructor
+
+  factory InvoiceService() => _instance;
+
+  Future<void> sendReminders() async {
+    _logger.i('🔄 Sending reminders...');
+    try {
+      // Logic
+    } catch (e) {
+      _logger.e('Failed: $e');
+      rethrow;
+    }
+  }
+}
+```
+
+**Without Logger (Some services like PrepaymentCodeService):**
+- No factory needed if no Logger overhead expected
+- Still use static final instance
+
+**Usage**: `InvoiceService().sendReminders()` - always same instance across app.
 
 ### Feature Flags & Personalization
 Stored in `user_preferences.features` (JSONB):
@@ -121,19 +191,27 @@ final businessType = prefs?['business_type'];  // 'freelancer' or 'trades'
 ```
 See [lib/services/feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for bulk feature management.
 
-## Services Architecture (35+ files)
+## Services Architecture (38 files)
 
 ### Core Business Logic
 - `invoice_service.dart` - Overdue reminders, payment status tracking
+- `recurring_invoice_service.dart` - Auto-billing setup and schedule management
 - `tax_service.dart` - 40+ country tax rates + calculation
 - `ocr_service.dart` - Receipt image → JSON extraction
 - `pdf_service.dart` - Invoice PDF generation + templating
+- `company_profile_service.dart` - Organization profile, logo, branding
+
+### Team & Device Management
+- `team_member_control_service.dart` - Team member codes, permissions, approval workflow (owner-controlled)
+- `device_management_service.dart` - Mobile/tablet device registration, reference codes, access control
+- `team_page.dart` - UI for managing team members and their roles/permissions
 
 ### Payment & Subscriptions
 - `stripe_service.dart` - Stripe checkout, invoice sync, webhook handling
+- `stripe_payment_service.dart` - Stripe payment operations (separate from checkout)
 - `paddle_service.dart`, `paddle_payment_service.dart` - Paddle integration
 - `trial_service.dart` - Trial creation, expiry tracking, upsell logic
-- `prepayment_code_service.dart` - Prepaid code redemption (gift cards)
+- `prepayment_code_service.dart` - Prepaid code redemption (gift cards, prepayment codes)
 
 ### AI & Automation
 - `aura_ai_service.dart` - Groq LLM command parsing (SECURE: via Edge Function only)
@@ -142,6 +220,10 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `lead_agent_service.dart` - Follow-up reminders, cold lead flagging
 - `supplier_ai_agent.dart` - Supplier cost optimization
 - `marketing_automation_service.dart` - Email campaigns, engagement tracking
+
+### Feature Personalization
+- `feature_personalization_service.dart` - Mobile (max 8 features) / Tablet (max 12 features) customization
+- `feature_personalization_page.dart` - UI for users to customize visible features per device
 
 ### Integrations
 - `whatsapp_service.dart` - Message dispatch, media upload, delivery logs
@@ -180,11 +262,30 @@ cd build/web && python -m http.server 8000
 ```
 
 ### Route Management
-All routes defined in [lib/main.dart](../lib/main.dart#L70-L105). When adding new page:
-1. Import page class at top of main.dart
-2. Add to `routes` map with path
-3. Add to bottom nav in `HomePageNav` if needed
-4. Protect with auth check in `onGenerateRoute`
+All routes defined in [lib/main.dart](../lib/main.dart#L46-L65). When adding new page:
+
+1. **Import & Register**: Add to `routes` map
+   ```dart
+   routes: {
+     '/': (c) => const LandingPageAnimated(),
+     '/sign-in': (c) => const SignInPage(),
+     '/dashboard': (c) => const DashboardPage(),
+     '/new-page': (c) => const NewPage(),  // Add here
+   }
+   ```
+
+2. **Protect with Auth**: Routes like `/dashboard` are checked in `onGenerateRoute`
+   ```dart
+   onGenerateRoute: (settings) {
+     if ((settings.name == '/dashboard' || settings.name == '/new-page') && 
+         Supabase.instance.client.auth.currentUser == null) {
+       return MaterialPageRoute(builder: (c) => const SignInPage());
+     }
+     return null;
+   }
+   ```
+
+3. **Add to Bottom Nav** (if needed in HomePage)
 
 ## Code Style & Conventions
 
@@ -205,12 +306,14 @@ try {
 ```
 
 ### Responsive Design
+Breakpoints and feature limits per device type:
 ```dart
 final width = MediaQuery.of(context).size.width;
-final isMobile = width < 600;
-final isTablet = width >= 600 && width < 1200;
-final isDesktop = width >= 1200;
+final isMobile = width < 600;   // Max 8 features
+final isTablet = width >= 600 && width < 1200;  // Max 12 features
+final isDesktop = width >= 1200;  // Desktop web
 ```
+Note: Feature personalization enforces max features per device type (see `FeaturePersonalizationService`)
 
 ## Permission & Subscription Model
 
@@ -247,15 +350,69 @@ final canAccessBilling = isOwner && org['stripe_status'] != 'cancelled';
 - `whatsapp_numbers` - Org phone accounts; `org_id, phone, account_sid, auth_token`
 - `integrations` - Third-party creds; `org_id, provider(stripe|paddle|hubspot), config(JSONB), active`
 
-## AI Agent Tips
+## Critical Implementation Patterns
 
-1. **API Keys**: NEVER hardcode. All keys stored in Supabase Secrets → Edge Functions. Frontend calls Edge Function, not API.
-2. **Multi-tenancy**: Always filter queries by `org_id`. RLS policies assume this. Missing it = security breach.
-3. **Mounted checks**: Before setState in catch/finally blocks; prevents "setState after dispose" crashes.
-4. **Supabase errors**: Never silently catch. Log with emoji, show user-facing message, then optionally rethrow.
-5. **New routes**: Update [lib/main.dart](../lib/main.dart), import page, add to routes map, add auth check.
-6. **Feature flags**: Check `user_preferences.features` before expensive operations.
-7. **Breaking changes**: Touching schema → audit `invoice_service.dart`, `trial_service.dart`, `integration_service.dart` for impacts.
-8. **Offline state**: Check `Supabase.instance.client.auth.currentUser` (null = disconnected or logged out).
-9. **Tests**: No test fixtures yet; use real Supabase dev project or SQL seeds from `database/jobs_schema.sql`.
-10. **Logging**: Use emoji prefixes in ALL prints; grep for them during debugging (e.g., `grep "❌" app.log`).
+### Multi-tenancy & Security
+1. **ALWAYS filter by `org_id`**: RLS policies depend on it
+   ```dart
+   final data = await supabase
+       .from('invoices')
+       .select()
+       .eq('org_id', currentOrgId)  // NEVER SKIP
+       .eq('status', 'sent');
+   ```
+2. **API Keys**: NEVER hardcode. All keys in Supabase Secrets → Edge Functions only.
+3. **Missing `org_id` = SECURITY BREACH** - audit before deploying.
+
+### Authentication on Protected Pages
+Every protected page needs **both** `initState` check AND `build` guard:
+```dart
+@override
+void initState() {
+  super.initState();
+  _checkAuth();
+}
+
+Future<void> _checkAuth() async {
+  if (Supabase.instance.client.auth.currentUser == null) {
+    if (mounted) Navigator.pushReplacementNamed(context, '/');
+  }
+}
+
+@override
+Widget build(BuildContext context) {
+  if (Supabase.instance.client.auth.currentUser == null) {
+    return const Scaffold(body: Center(child: Text('Unauthorized')));
+  }
+  // Page content
+}
+```
+**Why both checks**: `initState` redirects on first load; `build` guards against async race conditions and hot reloads.
+
+### Service Layer Responsibilities
+- Business logic only (invoice calculations, payment processing, API calls)
+- **Never**: UI code, navigation, context references, setState
+- Always log with `_logger.i()`, `_logger.e()`, `_logger.w()`
+- Use singleton pattern for all services
+
+### Feature Personalization
+Always check before rendering feature-heavy sections:
+```dart
+final features = await FeaturePersonalizationService()
+    .getPersonalizedFeatures(userId: userId, deviceType: 'mobile');
+final hasAI = features.any((f) => f['id'] == 'ai_agents');
+```
+
+### Key Audit Points
+When modifying core tables, audit impacts in:
+- `invoice_service.dart` - invoice calculations, reminders, payment status
+- `trial_service.dart` - trial expiry, plan upgrades
+- `integration_service.dart` - third-party syncs (HubSpot, QuickBooks, Slack)
+- `stripe_service.dart` / `paddle_service.dart` - subscription webhooks
+
+### Common Patterns to Follow
+1. **Error messages**: Always include emoji + context: `print('❌ Failed to fetch invoices: $e')`
+2. **Mounted checks**: Always `if (mounted)` before setState in catch/finally blocks
+3. **Async loading state**: Use local `bool loading = true` state, set in try/finally
+4. **Supabase errors**: Never silently catch; always log and optionally rethrow
+5. **Route additions**: Add to `routes` map in main.dart → add auth check in `onGenerateRoute`

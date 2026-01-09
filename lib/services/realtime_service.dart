@@ -1,17 +1,18 @@
 // lib/services/realtime_service.dart
-// Stub - disabled in current version
-// Real-time updates will be added in future releases
+/// Real-time Collaboration Service
+/// Manages Supabase subscriptions for live job, invoice, and team updates
+library;
+
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _logger = Logger();
 
-/// Real-time Collaboration Service (STUB - DISABLED)
-/// Manages Supabase subscriptions for live job, invoice, and team updates
-/// This is a placeholder for future real-time features
 class RealtimeService {
   static final RealtimeService _instance = RealtimeService._internal();
   final supabase = Supabase.instance.client;
+  
+  final Map<String, RealtimeChannel> _channels = {};
 
   RealtimeService._internal();
 
@@ -20,49 +21,145 @@ class RealtimeService {
   }
 
   /// Listen to real-time job updates for current organization
-  /// Currently returns empty stream - will be implemented in future
   Stream<List<Map<String, dynamic>>> listenToJobs(
     String orgId,
     void Function(Map<String, dynamic> data, String action) onJobChange,
   ) {
-    _logger.i('ℹ️ Jobs real-time listener is disabled');
-    return const Stream.empty();
+    try {
+      _logger.i('🔄 Subscribing to real-time job updates for org: $orgId');
+      
+      final channel = supabase.channel('jobs:$orgId');
+      _channels['jobs:$orgId'] = channel;
+      
+      channel
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'jobs',
+            callback: (payload) {
+              _logger.i('✅ Job update received: ${payload.eventType}');
+              final data = payload.newRecord.isNotEmpty ? payload.newRecord : payload.oldRecord;
+              onJobChange(data, payload.eventType.toString());
+            },
+          )
+          .subscribe();
+      
+      _logger.i('✅ Job real-time subscription active');
+      
+      return Stream.empty();
+    } catch (e) {
+      _logger.e('❌ Error subscribing to jobs: $e');
+      return Stream.empty();
+    }
   }
 
   /// Listen to real-time invoice updates
-  /// Currently returns empty stream - will be implemented in future
   Stream<List<Map<String, dynamic>>> listenToInvoices(
     String orgId,
     void Function(Map<String, dynamic> data, String action) onInvoiceChange,
   ) {
-    _logger.i('ℹ️ Invoices real-time listener is disabled');
-    return const Stream.empty();
+    try {
+      _logger.i('🔄 Subscribing to real-time invoice updates for org: $orgId');
+      
+      final channel = supabase.channel('invoices:$orgId');
+      _channels['invoices:$orgId'] = channel;
+      
+      channel
+          .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'invoices',
+            callback: (payload) {
+              _logger.i('✅ Invoice update received: ${payload.eventType}');
+              final data = payload.newRecord.isNotEmpty ? payload.newRecord : payload.oldRecord;
+              onInvoiceChange(data, payload.eventType.toString());
+            },
+          )
+          .subscribe();
+      
+      _logger.i('✅ Invoice real-time subscription active');
+      
+      return Stream.empty();
+    } catch (e) {
+      _logger.e('❌ Error subscribing to invoices: $e');
+      return Stream.empty();
+    }
   }
 
   /// Listen to team activity (users online, team member actions)
-  /// Currently returns empty stream - will be implemented in future
   Stream<List<Map<String, dynamic>>> listenToTeamActivity(
     String orgId,
     void Function(Map<String, dynamic> presence) onPresenceChange,
   ) {
-    _logger.i('ℹ️ Team activity listener is disabled');
-    return const Stream.empty();
+    try {
+      _logger.i('🔄 Subscribing to team activity for org: $orgId');
+      
+      final channel = supabase.channel('team:$orgId');
+      _channels['team:$orgId'] = channel;
+      
+      channel
+          .onPresenceSync((payload) {
+            _logger.i('✅ Team presence synced');
+            try {
+              final state = channel.presenceState();
+              for (var presence in state) {
+                // Convert presence to a simple presence data map
+                final presenceData = <String, dynamic>{
+                  'status': 'online',
+                  'timestamp': DateTime.now().toIso8601String(),
+                };
+                onPresenceChange(presenceData);
+              }
+            } catch (e) {
+              _logger.w('⚠️ Error processing presence state: $e');
+            }
+          })
+          .subscribe();
+      
+      _logger.i('✅ Team activity subscription active');
+      
+      return Stream.empty();
+    } catch (e) {
+      _logger.e('❌ Error subscribing to team activity: $e');
+      return Stream.empty();
+    }
   }
 
   /// Broadcast user presence (online status, current page)
-  /// Currently does nothing - will be implemented in future
   Future<void> broadcastPresence(String orgId, {
     required String page,
     required String status,
   }) async {
-    _logger.i('ℹ️ Presence broadcast is disabled');
-    return;
+    try {
+      final channel = _channels['team:$orgId'] ?? supabase.channel('team:$orgId');
+      
+      await channel.track({
+        'user_id': supabase.auth.currentUser?.id,
+        'email': supabase.auth.currentUser?.email,
+        'page': page,
+        'status': status,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+      
+      _logger.i('✅ Presence broadcasted: $page - $status');
+    } catch (e) {
+      _logger.e('❌ Error broadcasting presence: $e');
+    }
   }
 
   /// Unsubscribe from all real-time channels
-  /// Currently does nothing - will be implemented in future
   Future<void> unsubscribeAll() async {
-    _logger.i('ℹ️ Unsubscribe all is disabled');
-    return;
+    try {
+      _logger.i('🔄 Unsubscribing from all real-time channels');
+      
+      for (var channel in _channels.values) {
+        await supabase.removeChannel(channel);
+      }
+      
+      _channels.clear();
+      _logger.i('✅ All real-time subscriptions closed');
+    } catch (e) {
+      _logger.e('❌ Error unsubscribing: $e');
+    }
   }
 }

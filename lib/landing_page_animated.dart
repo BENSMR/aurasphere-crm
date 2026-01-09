@@ -675,17 +675,27 @@ class _PricingCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 28),
-              ...features.map((feature) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 20),
-                    const SizedBox(width: 12),
-                    Text(feature, style: const TextStyle(fontSize: 16)),
-                  ],
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: features.map((feature) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(feature, style: const TextStyle(fontSize: 16)),
+                          ),
+                        ],
+                      ),
+                    )).toList(),
+                  ),
                 ),
-              )),
-              const SizedBox(height: 32),
+              ),
+              const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -694,9 +704,9 @@ class _PricingCard extends StatelessWidget {
                     backgroundColor: const Color(0xFF007BFF),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Start Free Trial', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('Start Free Trial', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
               ),
             ],

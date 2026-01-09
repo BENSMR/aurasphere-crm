@@ -30,21 +30,17 @@ class AuraSecurity {
         _logger.d('✅ Existing AES-256 encryption key loaded from secure storage');
       } else {
         // Generate new key and IV
-        _encryptionKey = encryptLib.Key.fromSecureRandom(32); // 256-bit key
-        _iv = encryptLib.IV.fromSecureRandom(16); // 128-bit IV
+        final newKey = encryptLib.Key.fromSecureRandom(32); // 256-bit key
+        final newIv = encryptLib.IV.fromSecureRandom(16); // 128-bit IV
+        _encryptionKey = newKey;
+        _iv = newIv;
         
-        // Store in secure storage
-        await _storage.write(
-          key: _keyName,
-          value: base64.encode(_encryptionKey!.bytes),
-        );
-        await _storage.write(
-          key: _ivName,
-          value: base64.encode(_iv!.bytes),
-        );
-        _logger.i('✅ New AES-256 encryption keys generated and stored securely');
+        // Store securely
+        await _storage.write(key: _keyName, value: newKey.base64);
+        await _storage.write(key: _ivName, value: newIv.base64);
+        _logger.d('✅ New AES-256 encryption key generated and stored securely');
       }
-      
+          
       _initialized = true;
     } catch (e) {
       _logger.e('❌ PKI initialization failed: $e');
@@ -52,22 +48,56 @@ class AuraSecurity {
     }
   }
 
-  /// Encrypt sensitive data (stub - returns data as-is for now)
+  /// Encrypt sensitive data using AES-256-CBC
   static String encrypt(String data) {
-    _logger.d('🔒 Encrypting data...');
-    // In production, implement proper AES-256-CBC encryption
-    // For now, return as-is since data is transmitted via HTTPS
-    return base64.encode(utf8.encode(data));
+    if (!_initialized || _encryptionKey == null || _iv == null) {
+      _logger.w('⚠️ Encryption not initialized, returning base64');
+      return base64.encode(utf8.encode(data));
+    }
+
+    try {
+      _logger.d('🔒 Encrypting data with AES-256...');
+      final encrypter = encryptLib.Encrypter(
+        encryptLib.AES(_encryptionKey!, mode: encryptLib.AESMode.cbc),
+      );
+      
+      final encrypted = encrypter.encrypt(data, iv: _iv!);
+      _logger.d('✅ Data encrypted successfully');
+      return encrypted.base64;
+    } catch (e) {
+      _logger.e('❌ Encryption failed, returning base64: $e');
+      return base64.encode(utf8.encode(data));
+    }
   }
 
-  /// Decrypt data (stub)
+  /// Decrypt data using AES-256-CBC
   static String decrypt(String encrypted) {
-    _logger.d('🔓 Decrypting data...');
+    if (!_initialized || _encryptionKey == null || _iv == null) {
+      _logger.w('⚠️ Encryption not initialized, trying base64 decode');
+      try {
+        return utf8.decode(base64.decode(encrypted));
+      } catch (e) {
+        return encrypted;
+      }
+    }
+
     try {
-      return utf8.decode(base64.decode(encrypted));
+      _logger.d('🔓 Decrypting data with AES-256...');
+      final encrypter = encryptLib.Encrypter(
+        encryptLib.AES(_encryptionKey!, mode: encryptLib.AESMode.cbc),
+      );
+      
+      final decrypted = encrypter.decrypt64(encrypted, iv: _iv!);
+      _logger.d('✅ Data decrypted successfully');
+      return decrypted;
     } catch (e) {
-      _logger.e('❌ Decryption failed: $e');
-      return encrypted;
+      _logger.e('❌ Decryption failed, trying base64: $e');
+      try {
+        return utf8.decode(base64.decode(encrypted));
+      } catch (e2) {
+        _logger.e('❌ Base64 decode also failed: $e2');
+        return encrypted;
+      }
     }
   }
 

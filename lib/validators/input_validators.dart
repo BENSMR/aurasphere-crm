@@ -71,8 +71,8 @@ class InputValidators {
     }
 
     // Check for at least one special character
-    if (!password.contains(RegExp(r'[!@#$%^&*()_+\-=\[\]{};:".<>?/\\|`~]'))) {
-      return 'Password must contain at least one special character (!@#$%^&*)';
+    if (!password.contains(RegExp(r'[!@#$%^*()_+=\[\]{}:";.<>?/\\|`~-]'))) {
+      return 'Password must contain at least one special character (!@#\$%^&*)';
     }
 
     return null; // Valid
