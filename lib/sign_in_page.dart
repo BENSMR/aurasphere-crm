@@ -56,46 +56,34 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
       
-      _logger.i('🔐 Attempting sign-in with: $email');
+      // Real Supabase Authentication
+      _logger.i('🔐 Authenticating with Supabase: $email');
       
-      // Enable demo mode automatically
-      _logger.i('✅ DEMO MODE: Signing in with demo account: $email');
-      _logger.i('✅ Navigating to dashboard...');
+      final response = await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      _logger.i('✅ Authentication successful: ${response.user?.id}');
       
       if (mounted) {
-        await Future.delayed(const Duration(milliseconds: 500));
         Navigator.pushReplacementNamed(context, '/home');
       }
     } on AuthException catch (e) {
-      _logger.e('❌ AuthException: ${e.message}');
-      _logger.e('❌ Error details: ${e.toString()}');
-      
-      setState(() {
-        _errorMessage = 'Auth error - using demo mode';
-        _demoMode = true;
-      });
-      
+      _logger.e('❌ Auth error: ${e.message}');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('✅ Demo Mode Enabled - Click Sign In again to access the app'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ));
+        setState(() => _errorMessage = e.message);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign in failed: ${e.message}'))
+        );
       }
     } catch (e) {
-      _logger.e('❌ Error during sign in: $e');
-      
-      setState(() {
-        _errorMessage = 'Connection error - using demo mode';
-        _demoMode = true;
-      });
-      
+      _logger.e('❌ Unexpected error: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('✅ Demo Mode Enabled - Click Sign In again to access the app'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ));
+        setState(() => _errorMessage = e.toString());
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'))
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);

@@ -12,7 +12,7 @@ class EnvLoader {
   // Fallback values for web (hardcoded from Supabase project)
   static final Map<String, String> _fallbackEnv = {
     // Supabase Configuration
-    'SUPABASE_URL': 'https://fppmvibvpxrkwmymszhd.supabase.co',
+    'SUPABASE_URL': 'https://fppmuibvpxrkwmymszhd.supabase.co',
     'SUPABASE_ANON_KEY': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcG11aWJ2cHhya3dteW1zemhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjU1MzUsImV4cCI6MjA4MTcwMTUzNX0.Qm99GcdIdl9iBywdsjmP8Gh5SMLk3UYulwytxXTnzxA',
     
     // AI & LLM Configuration

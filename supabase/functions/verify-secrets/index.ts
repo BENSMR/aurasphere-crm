@@ -53,7 +53,7 @@ serve(async (req) => {
 
   const results = {
     timestamp: new Date().toISOString(),
-    project_url: "https://fppmvibvpxrkwmymszhd.supabase.co",
+    project_url: "https://fppmuibvpxrkwmymszhd.supabase.co",
     secrets: {} as Record<string, any>,
     summary: {
       total: 0,
