@@ -8,7 +8,7 @@
 - **Frontend**: Flutter (Dart) with Material Design 3 + seeded colors from `#007BFF` (Electric Blue)
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
 - **State Management**: SetState-only (no Provider/Riverpod/BLoC) - all pages manage local state via `setState()`
-- **Routing**: Named routes in [lib/main.dart](../lib/main.dart#L46-L65) with auth guards on protected routes
+- **Routing**: Named routes in [lib/main.dart](../lib/main.dart#L47-L59) with auth guards on protected routes
 - **i18n**: Manual JSON lookup in `assets/i18n/{en,fr,it,de,es,ar,mt,bg}.json`
 - **Logging**: `package:logger/logger.dart` with emoji prefixes (use Logger in services, print() in pages for emoji logging)
 
@@ -200,6 +200,7 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `ocr_service.dart` - Receipt image → JSON extraction
 - `pdf_service.dart` - Invoice PDF generation + templating
 - `company_profile_service.dart` - Organization profile, logo, branding
+- `digital_signature_service.dart` - XAdES-B/T/C/X invoice signing, RSA-SHA256, certificate management
 
 ### Team & Device Management
 - `team_member_control_service.dart` - Team member codes, permissions, approval workflow (owner-controlled)
@@ -241,6 +242,43 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `aura_security.dart` - PKI key rotation, encryption
 - `offline_service.dart` - Cached data + sync on reconnect
 - `whitelabel_service.dart` - White-label tenant customization
+- `digital_signature_service.dart` - XAdES signing (B/T/C/X levels), RSA-SHA256/512, cert management
+
+## Digital Signatures (XAdES-B Compliance)
+
+New feature for electronic invoice signing with regulatory compliance:
+
+### Standards & Algorithms
+- **Format**: XAdES-B (with optional timestamp for T/C/X levels)
+- **Algorithm**: RSA-SHA256 (default) or RSA-SHA512
+- **Encoding**: UTF-8 for all XML and signature data
+- **Certificate Format**: PEM-encoded X.509 certificates
+
+### Service Pattern
+```dart
+final sigService = DigitalSignatureService();
+
+// Upload signing certificate
+await sigService.uploadCertificate(
+  orgId: orgId,
+  certificatePem: pemData,
+  certificateName: 'Company Legal Signature',
+  keyPassword: password,
+);
+
+// Sign an invoice
+final signed = await sigService.signInvoice(
+  orgId: orgId,
+  invoiceId: invoiceId,
+  certificateId: certId,
+  xadesLevel: 'B', // XAdES-B, T, C, or X
+);
+```
+
+### Database Tables
+- `digital_certificates` - Certificate storage, validity tracking, revocation
+- `invoice_signatures` - Signature records, XAdES XML, audit trail
+- Both tables enforce `org_id` RLS policies
 
 ## Workflow & Build
 
@@ -262,7 +300,7 @@ cd build/web && python -m http.server 8000
 ```
 
 ### Route Management
-All routes defined in [lib/main.dart](../lib/main.dart#L46-L65). When adding new page:
+All routes defined in [lib/main.dart](../lib/main.dart#L47-L59). When adding new page:
 
 1. **Import & Register**: Add to `routes` map
    ```dart
@@ -315,6 +353,21 @@ final isDesktop = width >= 1200;  // Desktop web
 ```
 Note: Feature personalization enforces max features per device type (see `FeaturePersonalizationService`)
 
+### Internationalization (i18n)
+Manual JSON-based i18n with 9 language support (en, fr, it, de, es, ar, mt, bg):
+```dart
+// Load locale JSON
+final jsonString = await rootBundle.loadString('assets/i18n/$languageCode.json');
+final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
+
+// Access translations
+final greeting = jsonData['greeting'] ?? 'Hello';  // Fallback to English key
+final welcome = jsonData['dashboard']?['welcome'] ?? 'Welcome';  // Nested access
+```
+- JSON files in `assets/i18n/`
+- Store user language in `user_preferences.language`
+- Always provide fallback keys when accessing nested structures
+
 ## Permission & Subscription Model
 
 ### Roles
@@ -352,6 +405,28 @@ final canAccessBilling = isOwner && org['stripe_status'] != 'cancelled';
 
 ## Critical Implementation Patterns
 
+### Secure API Calls via Edge Functions (CRITICAL)
+**Pattern**: Never expose API keys on frontend. Always use Supabase Edge Functions as a proxy:
+
+```dart
+// ✅ CORRECT: Call Edge Function (key hidden in Supabase Secrets)
+final result = await supabase.functions.invoke(
+  'supplier-ai-agent',
+  body: {'input': userInput, 'language': 'en'},
+);
+
+// ❌ WRONG: Never do this
+const groqKey = 'gsk_...';  // EXPOSED! Anyone can reverse-engineer
+await fetch('https://api.groq.com/...', headers: {'Authorization': 'Bearer $groqKey'})
+```
+
+**Implementation**: Each external API (Groq, Resend, Stripe, etc.) has an Edge Function wrapper:
+- `supabase/functions/supplier-ai-agent/` - Groq LLM (uses `Deno.env.get('GROQ_API_KEY')`)
+- `supabase/functions/send-email/` - Resend email (uses `Deno.env.get('RESEND_API_KEY')`)
+- API keys stored securely in Supabase → Settings → Secrets (encrypted at rest)
+
+**Services using this pattern**: `aura_ai_service.dart`, `email_service.dart`, `backend_api_proxy.dart`
+
 ### Multi-tenancy & Security
 1. **ALWAYS filter by `org_id`**: RLS policies depend on it
    ```dart
@@ -361,8 +436,15 @@ final canAccessBilling = isOwner && org['stripe_status'] != 'cancelled';
        .eq('org_id', currentOrgId)  // NEVER SKIP
        .eq('status', 'sent');
    ```
-2. **API Keys**: NEVER hardcode. All keys in Supabase Secrets → Edge Functions only.
-3. **Missing `org_id` = SECURITY BREACH** - audit before deploying.
+   All tables enforce RLS: queries missing `org_id` fail at DB layer.
+
+2. **API Keys**: NEVER hardcode or load from env. Use Edge Functions + Supabase Secrets:
+   - Frontend calls Edge Function via `supabase.functions.invoke()`
+   - Edge Function retrieves key: `Deno.env.get('GROQ_API_KEY')`
+   - Key never transmitted to client
+   - See [backend_api_proxy.dart](../lib/services/backend_api_proxy.dart) for pattern
+
+3. **Missing `org_id` = SECURITY BREACH** - audit all Supabase queries before deploying.
 
 ### Authentication on Protected Pages
 Every protected page needs **both** `initState` check AND `build` guard:
@@ -403,6 +485,12 @@ final features = await FeaturePersonalizationService()
 final hasAI = features.any((f) => f['id'] == 'ai_agents');
 ```
 
+### Real-Time & Offline
+- **Real-time updates**: Use `realtime_service.dart` for live data (presence, subscriptions)
+- **Offline sync**: `offline_service.dart` caches data locally and syncs on reconnect
+- **Service worker support**: Web app caches assets for offline mode
+- Don't implement real-time directly; use the service layer abstraction
+
 ### Key Audit Points
 When modifying core tables, audit impacts in:
 - `invoice_service.dart` - invoice calculations, reminders, payment status
@@ -416,3 +504,28 @@ When modifying core tables, audit impacts in:
 3. **Async loading state**: Use local `bool loading = true` state, set in try/finally
 4. **Supabase errors**: Never silently catch; always log and optionally rethrow
 5. **Route additions**: Add to `routes` map in main.dart → add auth check in `onGenerateRoute`
+6. **org_id in queries**: Every Supabase query must filter by `org_id` (RLS enforced)
+7. **Feature limits**: Enforce mobile (8 features) vs tablet (12 features) in [FeaturePersonalizationService](../lib/services/feature_personalization_service.dart)
+8. **Edge Function calls**: Use `supabase.functions.invoke()` never direct API calls with keys
+
+## Troubleshooting & Common Gotchas
+
+### Auth Issues
+- **Page shows "Unauthorized" then redirects**: Both `initState` check AND `build` guard are needed (see Auth Guard Pattern)
+- **Hot reload loses session**: Use `AuthGate` pattern in main.dart for non-blocking auth checks
+- **"setState after dispose"**: Always check `if (mounted)` before setState in catch/finally blocks
+
+### Supabase Query Issues
+- **RLS policy violation error**: Missing `.eq('org_id', orgId)` on your query
+- **Query returns empty but data exists**: Check RLS policies + user permissions in `org_members`
+- **Real-time subscriptions not updating**: Use [realtime_service.dart](../lib/services/realtime_service.dart) for presence/live data
+
+### Edge Function Issues
+- **"Function not found" error**: Ensure function deployed: `supabase functions list` should show it
+- **"Secret not configured" error**: Secret not added to Supabase → Settings → Secrets, or function redeployment needed
+- **CORS errors on web**: Edge functions return correct CORS headers (check [verify-secrets function](../supabase/functions/verify-secrets/index.ts))
+
+### Build & Deployment
+- **Web build size bloated**: Run `flutter build web --release` with `--tree-shake-icons`
+- **Hot reload doesn't work**: Cold restart with `flutter clean && flutter run -d chrome`
+- **Offline mode showing stale data**: Check `offline_service.dart` sync logic
