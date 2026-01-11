@@ -6,13 +6,15 @@ class InvoiceService {
   final supabase = Supabase.instance.client;
 
   /// Send reminders for overdue invoices (3+ days past due)
-  Future<void> sendOverdueReminders() async {
+  /// SECURITY: Must filter by org_id to prevent cross-organization data leaks
+  Future<void> sendOverdueReminders(String orgId) async {
     final today = DateTime.now();
     
     // Find unpaid invoices 3+ days overdue
     final overdueInvoices = await supabase
         .from('invoices')
         .select('id, number, amount, currency, due_date, payment_link, clients(email)')
+        .eq('org_id', orgId)
         .eq('status', 'sent')
         .lt('due_date', today.subtract(const Duration(days: 3)).toIso8601String())
         .isFilter('reminder_sent_at', null);

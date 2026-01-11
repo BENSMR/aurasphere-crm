@@ -151,39 +151,6 @@ class _PersonalizationPageState extends State<PersonalizationPage>
     }
   }
 
-  Future<void> _updateColor(String colorType, String newColor) async {
-    try {
-      final orgId = await _getOrgId();
-      if (orgId == null) return;
-
-      String primaryCol = colorType == 'primary' ? newColor : primaryColor;
-      String secondaryCol =
-          colorType == 'secondary' ? newColor : secondaryColor;
-      String accentCol = colorType == 'accent' ? newColor : accentColor;
-
-      await whiteLabelService.updateBrandColors(
-        orgId: orgId,
-        primaryColor: primaryCol,
-        secondaryColor: secondaryCol,
-        accentColor: accentCol,
-      );
-
-      setState(() {
-        if (colorType == 'primary') primaryColor = newColor;
-        if (colorType == 'secondary') secondaryColor = newColor;
-        if (colorType == 'accent') accentColor = newColor;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Color updated')),
-        );
-      }
-    } catch (e) {
-      print('❌ Error updating color: $e');
-    }
-  }
-
   Future<void> _toggleWatermark() async {
     try {
       final orgId = await _getOrgId();

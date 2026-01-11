@@ -21,7 +21,6 @@ class _SignInPageState extends State<SignInPage> {
   bool _loading = false;
   bool _showPassword = false;
   String? _errorMessage;
-  bool _demoMode = false;
 
   Future<void> _signIn() async {
     if (_loading) return;
@@ -67,7 +66,11 @@ class _SignInPageState extends State<SignInPage> {
       _logger.i('✅ Authentication successful: ${response.user?.id}');
       
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        // Wait a moment for Supabase to update session
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        }
       }
     } on AuthException catch (e) {
       _logger.e('❌ Auth error: ${e.message}');
@@ -92,10 +95,6 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<void> _goToSignUp() async {
     Navigator.pushReplacementNamed(context, '/sign-up');
-  }
-
-  Future<void> _goToForgotPassword() async {
-    Navigator.pushNamed(context, '/forgot-password');
   }
 
   @override
@@ -283,7 +282,7 @@ class _SignInPageState extends State<SignInPage> {
                               Container(
                                 padding: const EdgeInsets.all(ModernTheme.spacingM),
                                 decoration: BoxDecoration(
-                                  color: ModernTheme.dangerRed.withOpacity(0.1),
+                                  color: ModernTheme.dangerRed.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(ModernTheme.radiusMedium),
                                   border: Border.all(color: ModernTheme.dangerRed),
                                 ),

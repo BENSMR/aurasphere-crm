@@ -134,7 +134,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       value: features[key] as bool,
       onChanged: (_) => _toggleFeature(key),
-      activeColor: Colors.indigo,
+      activeThumbColor: Colors.indigo,
     );
   }
 }

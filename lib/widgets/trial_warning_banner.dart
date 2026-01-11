@@ -73,7 +73,7 @@ class _TrialWarningBannerState extends State<TrialWarningBanner> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: bannerColor.withOpacity(0.1),
+        color: bannerColor.withValues(alpha: 0.1),
         border: Border.all(color: bannerColor, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -174,7 +174,7 @@ class TrialEndingDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(

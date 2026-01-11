@@ -11,13 +11,13 @@ declare const Deno: {
 
 declare interface Request {
   json(): Promise<any>;
-  method: string;
-  headers: Headers;
+  readonly method: string;
+  readonly headers: Headers;
   [key: string]: any;
 }
 
 declare interface Response {
-  ok: boolean;
-  status: number;
+  readonly ok: boolean;
+  readonly status: number;
   [key: string]: any;
 }

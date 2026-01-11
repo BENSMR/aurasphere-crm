@@ -144,9 +144,9 @@ async function analyzeSuppliers(orgId: string) {
 
     if (!orders || orders.length === 0) continue;
 
-    const totalSpend = orders.reduce((sum, o) => sum + o.total_amount, 0);
+    const totalSpend = orders.reduce((sum: number, o: any) => sum + o.total_amount, 0);
     const deliveredOnTime = orders.filter(
-      (o) => o.delivered_at && new Date(o.delivered_at) < new Date(o.due_date)
+      (o: any) => o.delivered_at && new Date(o.delivered_at) < new Date(o.due_date)
     ).length;
 
     const onTimeRate = (deliveredOnTime / orders.length * 100).toFixed(1);
@@ -262,7 +262,7 @@ async function generateReorders(orgId: string) {
 
     if (!usage || usage.length === 0) continue;
 
-    const totalUsed = usage.reduce((sum, u) => sum + u.quantity, 0);
+    const totalUsed = usage.reduce((sum: number, u: any) => sum + u.quantity, 0);
     const consumptionPerDay = totalUsed / 30;
     const daysUntilStockout = item.quantity / consumptionPerDay;
 
@@ -314,7 +314,7 @@ async function generateInsights(orgId: string) {
     .eq("org_id", orgId);
 
   const productCounts: Record<string, number> = {};
-  productSuppliers?.forEach((ps) => {
+  productSuppliers?.forEach((ps: any) => {
     productCounts[ps.product_id] =
       (productCounts[ps.product_id] || 0) + 1;
   });

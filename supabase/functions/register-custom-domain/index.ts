@@ -6,7 +6,7 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS_HEADERS });
@@ -95,11 +95,12 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("❌ Domain registration error:", error);
-
+    
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || "Internal server error",
+        error: errorMessage,
       }),
       {
         status: 500,

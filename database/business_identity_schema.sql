@@ -100,7 +100,7 @@ INSERT INTO public.subscription_plans
 VALUES
 ('Solo', 'prod_solo_paddle_id', 999, 'online', 3, 1),
 ('Team', 'prod_team_paddle_id', 1500, 'shop', 3, 3),
-('Workshop', 'prod_workshop_paddle_id', 4900, 'pro', 5, 7)
+('Workshop', 'prod_workshop_paddle_id', 2900, 'pro', 5, 7)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================

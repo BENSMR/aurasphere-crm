@@ -102,7 +102,7 @@ class RealtimeService {
             _logger.i('✅ Team presence synced');
             try {
               final state = channel.presenceState();
-              for (var presence in state) {
+              for (var _ in state) {
                 // Convert presence to a simple presence data map
                 final presenceData = <String, dynamic>{
                   'status': 'online',

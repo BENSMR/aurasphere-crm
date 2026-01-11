@@ -152,7 +152,6 @@ class FeaturePersonalizationHelper {
           .asMap()
           .entries
           .map((entry) {
-            final index = entry.key;
             final feature = entry.value;
 
             return NavigationDestination(

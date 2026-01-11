@@ -131,7 +131,9 @@ class _FeaturePersonalizationPageState extends State<FeaturePersonalizationPage>
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    print('Screen width: $screenWidth, isMobile: $isMobile');
 
     return Scaffold(
       appBar: AppBar(

@@ -203,7 +203,6 @@ class ReportingService {
 
       final now = DateTime.now();
       final lastMonth = DateTime(now.year, now.month - 1, 1);
-      final twoMonthsAgo = DateTime(now.year, now.month - 2, 1);
 
       final currentMonthReport = await generateRevenueReport(
         orgId: orgId,

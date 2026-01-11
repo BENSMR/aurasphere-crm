@@ -386,7 +386,7 @@ class _InvoicePersonalizationPageState extends State<InvoicePersonalizationPage>
                               style: TextStyle(
                                 fontSize: 48,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.red.withOpacity(0.3),
+                                color: Colors.red.withValues(alpha: 0.3),
                               ),
                             ),
                           ),

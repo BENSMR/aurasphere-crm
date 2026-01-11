@@ -138,7 +138,7 @@ class _CompanyProfilePageState extends State<CompanyProfilePage> {
 
     setState(() => isSaving = true);
     try {
-      final result = await profileService.updateCompanyProfile(
+      await profileService.updateCompanyProfile(
         orgId: orgId!,
         companyName: companyNameCtrl.text,
         companyRegistration: registrationCtrl.text,

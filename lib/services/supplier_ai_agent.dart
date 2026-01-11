@@ -52,9 +52,7 @@ class SupplierAiAgent {
         'recommendations': <String>[],
         'opportunities': <Map<String, dynamic>>[],
       };
-
       // ✅ FIX #5: Analyze suppliers with timeout protection
-      int analyzed = 0;
       for (int i = 0; i < suppliers.length; i += 10) {
         try {
           // Analyze each supplier (max 10 concurrent)
@@ -124,7 +122,7 @@ class SupplierAiAgent {
             },
           );
           
-          analyzed += suppliersToAnalyze.length;
+          print('✅ Analyzed ${suppliersToAnalyze.length} suppliers');
         } catch (e) {
           print('❌ Error in supplier analysis batch: $e');
         }

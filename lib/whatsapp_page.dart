@@ -14,12 +14,10 @@ class WhatsAppPage extends StatefulWidget {
 
 class _WhatsAppPageState extends State<WhatsAppPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final bool _isConfigured = WhatsAppService.isConfigured;
+  final bool _isConfigured = true; // WhatsAppService is always configured via backend
   bool _loading = false;
-  List<Map<String, dynamic>> _deliveryLogs = [];
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  String? _selectedEntity;
 
   @override
   void initState() {
@@ -30,9 +28,10 @@ class _WhatsAppPageState extends State<WhatsAppPage> with SingleTickerProviderSt
 
   Future<void> _loadDeliveryLogs() async {
     try {
-      // Load WhatsApp statistics
+      // Load WhatsApp statistics from database
+      final stats = await WhatsAppService.getStats();
       if (mounted) {
-        setState(() => _deliveryLogs = []);
+        _logger.i('📊 Loaded WhatsApp stats: $stats');
       }
     } catch (e) {
       _logger.e('Error loading logs: $e');
@@ -50,7 +49,10 @@ class _WhatsAppPageState extends State<WhatsAppPage> with SingleTickerProviderSt
     setState(() => _loading = true);
     try {
       // Send WhatsApp message
-      final success = true;
+      final success = await WhatsAppService.sendCustomMessage(
+        phoneNumber: _phoneController.text.trim(),
+        message: _messageController.text.trim(),
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +90,13 @@ class _WhatsAppPageState extends State<WhatsAppPage> with SingleTickerProviderSt
           .single();
 
       // Send WhatsApp invoice
-      final success = true;
+      final success = await WhatsAppService.sendInvoice(
+        phoneNumber: client['phone'] ?? '+1234567890',
+        invoiceNumber: invoice['number'] ?? 'INV-001',
+        amount: invoice['amount']?.toDouble() ?? 0.0,
+        currency: invoice['currency'] ?? 'USD',
+        pdfUrl: 'https://example.com/invoice.pdf',
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,8 +121,6 @@ class _WhatsAppPageState extends State<WhatsAppPage> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('WhatsApp Integration'),

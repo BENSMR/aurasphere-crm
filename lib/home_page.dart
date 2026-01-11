@@ -51,10 +51,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _runDailyAutomation() async {
-    // Automation moved to backend - no-op here
-  }
-
   Future<void> _checkSubscription() async {
     try {
       final userId = Supabase.instance.client.auth.currentUser?.id;

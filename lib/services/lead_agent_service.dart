@@ -83,8 +83,18 @@ class LeadAgentService {
     await autoQualifyLeads();
     await flagColdLeads();
     
-    // Delegate invoice reminders to InvoiceService
-    await InvoiceService().sendOverdueReminders();
+    // Get current org for invoice reminders
+    final currentUser = supabase.auth.currentUser;
+    if (currentUser != null) {
+      final org = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('owner_id', currentUser.id)
+          .maybeSingle();
+      if (org != null) {
+        await InvoiceService().sendOverdueReminders(org['id'] as String);
+      }
+    }
     
     print('✅ Daily automation complete');
   }

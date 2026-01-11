@@ -120,10 +120,11 @@ serve(async (req: Request) => {
     }
   } catch (error) {
     console.error("❌ Scan receipt proxy error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return new Response(
       JSON.stringify({
         error: "Internal server error",
-        details: error.message,
+        details: errorMessage,
       }),
       {
         status: 500,

@@ -3,7 +3,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-serve(async (req) => {
+serve(async (req: Request) => {
   console.log("🔐 Verifying Supabase Secrets...")
 
   const secrets = {
@@ -60,6 +60,7 @@ serve(async (req) => {
       configured: 0,
       missing: 0,
       invalid: 0,
+      status: "",
     },
   }
 

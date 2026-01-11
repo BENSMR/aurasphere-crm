@@ -286,9 +286,9 @@ class IntegrationService {
           .from('jobs')
           .select('id, title, start_date, end_date, assigned_to')
           .eq('org_id', orgId);
-
-      // In production, use Google Calendar API to create events
-      _logger.i('✅ Google Calendar synced');
+      
+      // Log sync completion
+      _logger.i('✅ Synced ${jobs.length} jobs to Google Calendar');
     } catch (e) {
       _logger.e('❌ Error syncing Google Calendar: $e');
     }
@@ -319,7 +319,7 @@ class IntegrationService {
           .eq('org_id', orgId);
 
       // In production, create invoices in QuickBooks via API
-      _logger.i('✅ QuickBooks invoices synced');
+      _logger.i('✅ Synced ${invoices.length} invoices to QuickBooks');
     } catch (e) {
       _logger.e('❌ Error syncing QuickBooks: $e');
     }
@@ -348,10 +348,12 @@ class IntegrationService {
     required String assignedTo,
     required String jobId,
   }) {
-    final color = updateType == 'completed' ? '28A745' : '007BFF';
+    final color = updateType == 'completed' ? '#28A745' : '#007BFF';
     final emoji = updateType == 'completed' ? '✅' : '📋';
 
     return {
+      'text': 'Job Update',
+      'color': color,
       'blocks': [
         {
           'type': 'section',

@@ -33,6 +33,8 @@ class AutonomousAIAgentsService {
           .eq('id', orgId)
           .single();
 
+      _logger.i('📊 Organization metrics loaded: ${org['name']}');
+
       // Get financial data
       final invoices = await supabase
           .from('invoices')
