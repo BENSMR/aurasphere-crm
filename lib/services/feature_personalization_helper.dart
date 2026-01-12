@@ -187,8 +187,8 @@ class FeaturePersonalizationHelper {
   /// Get feature limit for device
   int getFeatureLimitForDevice(String deviceType) {
     return deviceType == 'mobile'
-        ? FeaturePersonalizationService.MOBILE_MAX_FEATURES
-        : FeaturePersonalizationService.TABLET_MAX_FEATURES;
+        ? FeaturePersonalizationService.mobileMaxFeatures
+        : FeaturePersonalizationService.tabletMaxFeatures;
   }
 
   /// Get remaining feature slots

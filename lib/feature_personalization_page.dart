@@ -17,7 +17,7 @@ class _FeaturePersonalizationPageState extends State<FeaturePersonalizationPage>
   late String selectedDeviceType = 'mobile';
   late List<Map<String, dynamic>> selectedFeatures = [];
   late List<Map<String, dynamic>> availableFeatures = [];
-  late int maxFeatures = FeaturePersonalizationService.MOBILE_MAX_FEATURES;
+  late int maxFeatures = FeaturePersonalizationService.mobileMaxFeatures;
   bool loading = true;
 
   @override
@@ -38,8 +38,8 @@ class _FeaturePersonalizationPageState extends State<FeaturePersonalizationPage>
       );
 
       maxFeatures = selectedDeviceType == 'mobile'
-          ? FeaturePersonalizationService.MOBILE_MAX_FEATURES
-          : FeaturePersonalizationService.TABLET_MAX_FEATURES;
+          ? FeaturePersonalizationService.mobileMaxFeatures
+          : FeaturePersonalizationService.tabletMaxFeatures;
 
       setState(() {
         selectedFeatures = features;

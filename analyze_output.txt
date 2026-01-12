@@ -46,7 +46,6 @@ warning - The declaration '_getTechnicianEmail' isn't referenced - lib\dispatch_
    info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\invoice_list_page.dart:336:58 - use_build_context_synchronously
    info - Don't invoke 'print' in production code - lib\invoice_personalization_page.dart:60:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\invoice_personalization_page.dart:98:7 - avoid_print
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\invoice_personalization_page.dart:389:51 - deprecated_member_use
    info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\invoice_personalization_page.dart:523:11 - deprecated_member_use
    info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\invoice_personalization_page.dart:524:11 - deprecated_member_use
    info - Don't use 'BuildContext's across async gaps - lib\job_detail_page.dart:63:7 - use_build_context_synchronously
@@ -57,7 +56,6 @@ warning - The value of the local variable 'org' isn't used - lib\job_detail_page
    info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\job_list_page.dart:222:66 - use_build_context_synchronously
    info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\job_list_page.dart:231:66 - use_build_context_synchronously
    info - Don't use 'BuildContext's across async gaps - lib\job_list_page.dart:310:29 - use_build_context_synchronously
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\landing_page_animated.dart:44:33 - deprecated_member_use
    info - 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre - lib\onboarding_survey.dart:157:13 - deprecated_member_use
    info - 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre - lib\onboarding_survey.dart:158:13 - deprecated_member_use
    info - Don't invoke 'print' in production code - lib\personalization_page.dart:91:7 - avoid_print
@@ -70,6 +68,15 @@ warning - The value of the local variable 'org' isn't used - lib\job_detail_page
 warning - The value of the local variable 'text' isn't used - lib\prepayment_code_admin_page.dart:110:11 - unused_local_variable
    info - Don't invoke 'print' in production code - lib\services\aura_ai_service.dart:51:7 - avoid_print
    info - The prefix 'encryptLib' isn't a lower_case_with_underscores identifier - lib\services\aura_security.dart:4:42 - library_prefixes
+warning - The value of the local variable 'avgDaily' isn't used - lib\services\autonomous_ai_agents_service.dart:148:13 - unused_local_variable
+  error - Conditions must have a static type of 'bool' - lib\services\autonomous_ai_agents_service.dart:572:9 - non_bool_condition
+   info - Unnecessary braces in a string interpolation - lib\services\autonomous_ai_agents_service.dart:596:55 - unnecessary_brace_in_string_interps
+  error - The name 'cfoAgentAnalysis' is already defined - lib\services\autonomous_ai_agents_service.dart:605:32 - duplicate_definition
+  error - The name 'ceoAgentAnalysis' is already defined - lib\services\autonomous_ai_agents_service.dart:694:32 - duplicate_definition
+  error - The name 'cooAgentAnalysis' is already defined - lib\services\autonomous_ai_agents_service.dart:731:32 - duplicate_definition
+  error - The name 'getAllAgentsReport' is already defined - lib\services\autonomous_ai_agents_service.dart:758:32 - duplicate_definition
+  error - The name 'calculateGrowthRate' is already defined - lib\services\autonomous_ai_agents_service.dart:779:10 - duplicate_definition
+  error - The name 'calculateRetentionRate' is already defined - lib\services\autonomous_ai_agents_service.dart:784:10 - duplicate_definition
    info - The constant name 'BACKUP_BUCKET' isn't a lowerCamelCase identifier - lib\services\backup_service.dart:17:23 - constant_identifier_names
 warning - The operand can't be 'null', so the condition is always 'true' - lib\services\email_service.dart:41:32 - unnecessary_null_comparison
 warning - Dead code - lib\services\email_service.dart:45:14 - dead_code
@@ -78,15 +85,44 @@ warning - Dead code - lib\services\email_service.dart:45:14 - dead_code
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:88:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:102:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:165:7 - avoid_print
+  error - The getter 'MOBILE_MAX_FEATURES' isn't defined for the type 'FeaturePersonalizationService' - lib\services\feature_personalization_helper.dart:190:41 - undefined_getter
+  error - The getter 'TABLET_MAX_FEATURES' isn't defined for the type 'FeaturePersonalizationService' - lib\services\feature_personalization_helper.dart:191:41 - undefined_getter
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:208:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:361:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:363:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:390:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:420:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\feature_personalization_helper.dart:422:7 - avoid_print
-   info - The constant name 'MOBILE_MAX_FEATURES' isn't a lowerCamelCase identifier - lib\services\feature_personalization_service.dart:16:20 - constant_identifier_names
-   info - The constant name 'TABLET_MAX_FEATURES' isn't a lowerCamelCase identifier - lib\services\feature_personalization_service.dart:17:20 - constant_identifier_names
-   info - The constant name 'ALL_FEATURES' isn't a lowerCamelCase identifier - lib\services\feature_personalization_service.dart:20:43 - constant_identifier_names
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:172:48 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:172:70 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:175:12 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:183:44 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:188:12 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:196:25 - undefined_identifier
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:212:50 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:212:72 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:222:24 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:230:32 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:279:16 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:285:14 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:292:14 - undefined_identifier
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:312:50 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:312:72 - undefined_identifier
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:430:32 - undefined_identifier
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:431:44 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:433:32 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:434:44 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:435:37 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:452:16 - undefined_identifier
+  error - Undefined name 'DEVICE_LIMITS_BY_PLAN' - lib\services\feature_personalization_service.dart:500:22 - undefined_identifier
+  error - Undefined name 'DEVICE_LIMITS_BY_PLAN' - lib\services\feature_personalization_service.dart:500:53 - undefined_identifier
+  error - Undefined name 'DEVICE_LIMITS_BY_PLAN' - lib\services\feature_personalization_service.dart:534:22 - undefined_identifier
+  error - Undefined name 'DEVICE_LIMITS_BY_PLAN' - lib\services\feature_personalization_service.dart:534:53 - undefined_identifier
+  error - Undefined name 'MOBILE_MAX_FEATURES' - lib\services\feature_personalization_service.dart:722:52 - undefined_identifier
+  error - Undefined name 'TABLET_MAX_FEATURES' - lib\services\feature_personalization_service.dart:722:74 - undefined_identifier
+  error - Undefined name 'ALL_FEATURES' - lib\services\feature_personalization_service.dart:725:29 - undefined_identifier
+  error - Undefined name 'DEFAULT_MOBILE_FEATURES' - lib\services\feature_personalization_service.dart:1115:36 - undefined_identifier
+  error - Undefined name 'DEFAULT_TABLET_FEATURES' - lib\services\feature_personalization_service.dart:1125:36 - undefined_identifier
    info - The constant name 'AVAILABLE_INTEGRATIONS' isn't a lowerCamelCase identifier - lib\services\integration_service.dart:22:29 - constant_identifier_names
    info - Don't invoke 'print' in production code - lib\services\invoice_service.dart:49:5 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\invoice_service.dart:61:5 - avoid_print
@@ -191,9 +227,7 @@ warning - The value of the field '_retryDelayMs' isn't used - lib\services\whats
 warning - The value of the field '_apiUrl' isn't used - lib\services\whatsapp_service.dart:8:16 - unused_field
    info - Don't invoke 'print' in production code - lib\services\whatsapp_service.dart:13:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\services\whatsapp_service.dart:22:7 - avoid_print
-   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor or activeTrackColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\settings\features_page.dart:137:7 - deprecated_member_use
    info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\settings_page.dart:191:11 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\sign_in_page.dart:285:64 - deprecated_member_use
    info - Don't invoke 'print' in production code - lib\supplier_management_page.dart:69:7 - avoid_print
 warning - The value of the local variable 'performance' isn't used - lib\supplier_management_page.dart:145:11 - unused_local_variable
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\supplier_management_page.dart:489:40 - deprecated_member_use
@@ -201,8 +235,6 @@ warning - The value of the local variable 'performance' isn't used - lib\supplie
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\supplier_management_page.dart:815:41 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\team_page.dart:309:44 - deprecated_member_use
    info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\technician_dashboard_page.dart:158:22 - deprecated_member_use
-   info - 'translate' is deprecated and shouldn't be used. Use translateByVector3, translateByVector4, or translateByDouble instead - lib\theme\modern_theme.dart:251:38 - deprecated_member_use
-   info - 'translate' is deprecated and shouldn't be used. Use translateByVector3, translateByVector4, or translateByDouble instead - lib\theme\modern_theme.dart:336:36 - deprecated_member_use
    info - Don't invoke 'print' in production code - lib\whatsapp_numbers_page.dart:273:7 - avoid_print
    info - Don't invoke 'print' in production code - lib\whatsapp_numbers_page.dart:326:7 - avoid_print
 warning - Dead code - lib\whatsapp_numbers_page.dart:348:23 - dead_code
@@ -211,8 +243,6 @@ warning - The left operand can't be null, so the right operand is never executed
   error - The method 'getStats' isn't defined for the type 'WhatsAppService' - lib\whatsapp_page.dart:32:43 - undefined_method
   error - The method 'sendCustomMessage' isn't defined for the type 'WhatsAppService' - lib\whatsapp_page.dart:52:45 - undefined_method
   error - The method 'sendInvoice' isn't defined for the type 'WhatsAppService' - lib\whatsapp_page.dart:93:45 - undefined_method
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\trial_warning_banner.dart:76:28 - deprecated_member_use
-   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\trial_warning_banner.dart:177:46 - deprecated_member_use
    info - Don't invoke 'print' in production code - web_server.dart:6:3 - avoid_print
 
-214 issues found. (ran in 8.5s)
+244 issues found. (ran in 3.2s)

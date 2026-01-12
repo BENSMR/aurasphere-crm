@@ -15,30 +15,42 @@ class PricingPage extends StatelessWidget {
     {
       'name': 'Solo',
       'price': '\$9.99',
+      'period': '/month',
       'description': '1 user • 25 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Custom logo & colors • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • All features',
       'plan_id': 'solo_trades',
       'max_users': 1,
       'max_jobs': 25,
+      'mobile_devices': 2,
+      'tablet_devices': 1,
+      'total_features': 6,
       'stripe_url': 'https://buy.stripe.com/abc123', // ← Replace with your SOLO link
       'color': 0xFF2196F3, // Blue
     },
     {
       'name': 'Team',
       'price': '\$15',
+      'period': '/month',
       'description': '3 users • 60 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Custom logo, colors & watermark • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • All features',
       'plan_id': 'small_team',
       'max_users': 3,
       'max_jobs': 60,
+      'mobile_devices': 3,
+      'tablet_devices': 2,
+      'total_features': 8,
       'stripe_url': 'https://buy.stripe.com/def456', // ← Replace with your TEAM link
       'color': 0xFF3F51B5, // Indigo
     },
     {
       'name': 'Workshop',
       'price': '\$29',
+      'period': '/month',
       'description': '7 users • 120 jobs/month • Advanced invoicing (recurring, deposits, milestones) • Full white-label (custom logo, colors, watermark) • SMS notifications • HubSpot & QuickBooks integrations • Autonomous AI agents (CEO, COO, CFO) • Marketing automation • Dedicated support • API access • All features',
       'plan_id': 'workshop',
       'max_users': 7,
       'max_jobs': 120,
+      'mobile_devices': 5,
+      'tablet_devices': 3,
+      'total_features': 13,
       'stripe_url': 'https://buy.stripe.com/ghi789', // ← Replace with your WORKSHOP link
       'color': 0xFF9C27B0, // Purple
     },
@@ -204,6 +216,8 @@ class PricingPage extends StatelessWidget {
                 plan['stripe_url'] as String,
                 plan['plan_id'] as String,
                 plan['max_users'] as int,
+                plan['mobile_devices'] as int,
+                plan['tablet_devices'] as int,
                 Color(plan['color'] as int),
               ),
             )),            
@@ -310,6 +324,8 @@ class PricingPage extends StatelessWidget {
     String stripeUrl,
     String planId,
     int maxUsers,
+    int mobileDevices,
+    int tabletDevices,
     Color accentColor,
   ) {
     // Calculate annual price with 20% discount
@@ -408,6 +424,15 @@ class PricingPage extends StatelessWidget {
             const Text('• AI Assistant • Multilingual PDFs • Receipt OCR', style: TextStyle(fontSize: 13)),
             const Text('• Inventory Tracking • Team Dispatch • Offline Mode', style: TextStyle(fontSize: 13)),
             const Text('• PKI Security • Technician Mobile App', style: TextStyle(fontSize: 13)),
+            const SizedBox(height: 12),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text('📱 Mobile & Tablet Access:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            const SizedBox(height: 4),
+            Text('• $mobileDevices mobile devices (6 customizable features per device)', 
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text('• $tabletDevices tablet device${tabletDevices > 1 ? 's' : ''} (8 customizable features per device)', 
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,

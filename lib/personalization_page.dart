@@ -204,8 +204,8 @@ class _PersonalizationPageState extends State<PersonalizationPage>
   Widget _buildFeaturesTab(String deviceType) {
     final selected = deviceType == 'mobile' ? selectedMobileFeatures : selectedTabletFeatures;
     final maxFeatures = deviceType == 'mobile'
-        ? FeaturePersonalizationService.MOBILE_MAX_FEATURES
-        : FeaturePersonalizationService.TABLET_MAX_FEATURES;
+        ? FeaturePersonalizationService.mobileMaxFeatures
+        : FeaturePersonalizationService.tabletMaxFeatures;
 
     return ListView(
       padding: const EdgeInsets.all(16),

@@ -1,5 +1,76 @@
 # AuraSphere CRM - AI Coding Agent Instructions
 
+**Last Updated**: January 2026 | Flutter 3.9.2 | Supabase 2.12.0
+
+## 🎯 Quick Start for AI Agents
+
+This is a **Flutter + Supabase SaaS CRM** with 40+ stateful pages, 40+ business logic services, and strict architectural constraints. The codebase enforces:
+- **SetState-only** state management (no Provider/Riverpod)
+- **Service layer** for all business logic (singleton pattern, never contains UI)
+- **Multi-tenant RLS** on every Supabase query (must filter by `org_id`)
+- **Edge Functions** as API proxies (no direct API calls with keys on frontend)
+- **Two-part auth checks** on protected pages (`initState` + `build` guard)
+
+### ⚠️ Critical Rules (Most Common Mistakes)
+
+1. **EVERY Supabase query must filter by `org_id`** - RLS policies enforce this; missing it = security breach + silent query failure
+   ```dart
+   // ✅ CORRECT
+   await supabase.from('invoices').select().eq('org_id', orgId).eq('status', 'sent');
+   
+   // ❌ WRONG - will fail silently or raise RLS error
+   await supabase.from('invoices').select().eq('status', 'sent');
+   ```
+
+2. **Auth checks on EVERY protected page (both `initState` + `build`)**
+   ```dart
+   // Missing check = page accessible without login on hot reload
+   @override
+   void initState() {
+     super.initState();
+     if (Supabase.instance.client.auth.currentUser == null) {
+       if (mounted) Navigator.pushReplacementNamed(context, '/');
+     }
+   }
+   
+   @override
+   Widget build(BuildContext context) {
+     if (Supabase.instance.client.auth.currentUser == null) {
+       return const Scaffold(body: Center(child: Text('Unauthorized')));
+     }
+     // Page content...
+   }
+   ```
+
+3. **Always check `if (mounted)` before setState in catch/finally blocks** - prevents "setState after dispose" crashes
+   ```dart
+   finally {
+     if (mounted) setState(() => loading = false);  // CRITICAL
+   }
+   ```
+
+4. **NEVER hardcode API keys or call external APIs directly from Flutter**
+   ```dart
+   // ❌ WRONG - key is exposed
+   const groqKey = 'gsk_...';
+   
+   // ✅ CORRECT - use Edge Function proxy
+   final result = await supabase.functions.invoke('groq-proxy', body: {...});
+   ```
+
+5. **Services never contain UI code** - they contain ONLY business logic
+   ```dart
+   // ❌ WRONG - UI code in service
+   class InvoiceService {
+     void showAlert() => showDialog(...);  // NEVER DO THIS
+   }
+   
+   // ✅ CORRECT - service returns data, page handles UI
+   class InvoiceService {
+     Future<Invoice> getInvoice(String id) async { ... }
+   }
+   ```
+
 ## Architecture Overview
 
 **AuraSphere CRM** is a Flutter web/mobile app for tradespeople to manage jobs, invoices, clients, and teams. Multi-tenant SaaS with Supabase backend, 9-language i18n, and extensive integrations (Stripe, Paddle, WhatsApp, QuickBooks, HubSpot, Slack).
@@ -7,22 +78,28 @@
 ### Core Stack
 - **Frontend**: Flutter (Dart) with Material Design 3 + seeded colors from `#007BFF` (Electric Blue)
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **State Management**: SetState-only (no Provider/Riverpod/BLoC) - all pages manage local state via `setState()`
-- **Routing**: Named routes in [lib/main.dart](../lib/main.dart#L47-L59) with auth guards on protected routes
+- **State Management**: **SetState-only** (no Provider/Riverpod/BLoC) - all pages manage local state via `setState()`
+- **Routing**: Named routes in [lib/main.dart](../lib/main.dart) with auth guards on protected routes
 - **i18n**: Manual JSON lookup in `assets/i18n/{en,fr,it,de,es,ar,mt,bg}.json`
-- **Logging**: `package:logger/logger.dart` with emoji prefixes (use Logger in services, print() in pages for emoji logging)
+- **Logging**: `package:logger/logger.dart` in services; `print()` with emoji in pages
+- **Services**: 40+ singleton services in `/lib/services/` (see [service inventory](#services-architecture))
 
 ### Key Directories
-- `/lib/services/` (38 files) - All business logic; singleton pattern with Logger; **never contains UI code**
-- `/lib/` - Pages & widgets; one file per route (`*_page.dart` naming); manages local state only
-- `/lib/theme/` - Custom components (`ModernButton`, `ModernCard`, `ModernPageTransition`)
-- `/lib/core/` - Auth helper, env loader, app theme config
-- `/lib/widgets/` - Reusable UI components (buttons, cards, forms)
+- `/lib/services/` (40 files) - **ALL business logic lives here**; singleton pattern; Logger for logging; **NEVER UI code**
+  - Example files: `invoice_service.dart`, `aura_ai_service.dart`, `stripe_service.dart`, `feature_personalization_service.dart`
+  - **Pattern**: Static final instance, private constructor, factory method, always call `.single()` or `.maybeSingle()` on Supabase queries
+- `/lib/` - Pages & widgets; ~25 `*_page.dart` files; each page manages only local state (loading, lists, form data)
+  - Every protected page must check `currentUser == null` in both `initState` + `build` 
+  - Use `setState()` with `if (mounted)` safety checks in catch/finally blocks
+- `/lib/widgets/` - Reusable UI components (ModernButton, ModernCard, ModernPageTransition)
+- `/lib/theme/` - Custom theme config and Material Design 3 extensions
+- `/lib/core/` - Auth helper, env loader, app theme
 - `/lib/validators/` - Input validation helpers
-- `/lib/settings/` - Settings pages (team, features, account)
-- `/lib/l10n/` - i18n/localization configuration
-- `/supabase/functions/` - Deno Edge Functions (Groq AI, WhatsApp, payment webhooks, supplier agent)
-- `/supabase/migrations/` - Database schema versions
+- `/supabase/functions/` - Deno Edge Functions (Groq AI, WhatsApp, payment webhooks, email, OCR)
+  - API keys stored in Supabase Secrets; functions retrieve them at runtime
+  - **Never expose keys on frontend** - always proxy through Edge Function
+- `/supabase/migrations/` - PostgreSQL schema versions
+- `/assets/i18n/` - 9 language JSON files (en, fr, it, de, es, ar, mt, bg)
 
 ### Critical Data Flows
 
@@ -191,7 +268,7 @@ final businessType = prefs?['business_type'];  // 'freelancer' or 'trades'
 ```
 See [lib/services/feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for bulk feature management.
 
-## Services Architecture (38 files)
+## Services Architecture (40 files)
 
 ### Core Business Logic
 - `invoice_service.dart` - Overdue reminders, payment status tracking
@@ -205,7 +282,7 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 ### Team & Device Management
 - `team_member_control_service.dart` - Team member codes, permissions, approval workflow (owner-controlled)
 - `device_management_service.dart` - Mobile/tablet device registration, reference codes, access control
-- `team_page.dart` - UI for managing team members and their roles/permissions
+- `feature_personalization_service.dart` - Owner control for device features (mobile 6 features / tablet 8 features)
 
 ### Payment & Subscriptions
 - `stripe_service.dart` - Stripe checkout, invoice sync, webhook handling
@@ -223,8 +300,8 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `marketing_automation_service.dart` - Email campaigns, engagement tracking
 
 ### Feature Personalization
-- `feature_personalization_service.dart` - Mobile (max 8 features) / Tablet (max 12 features) customization
-- `feature_personalization_page.dart` - UI for users to customize visible features per device
+- `feature_personalization_helper.dart` - Mobile/tablet feature helpers
+- See [feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for owner control layer
 
 ### Integrations
 - `whatsapp_service.dart` - Message dispatch, media upload, delivery logs
@@ -232,7 +309,7 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `email_service.dart`, `resend_email_service.dart` - Email via Resend
 - `quickbooks_service.dart` - OAuth + invoice/expense sync
 
-### Infrastructure
+### Infrastructure & Utilities
 - `realtime_service.dart` - Supabase subscriptions (presence, live updates)
 - `notification_service.dart` - In-app + email notifications, preference management
 - `backup_service.dart` - Scheduled org backups to cold storage
@@ -242,7 +319,7 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `aura_security.dart` - PKI key rotation, encryption
 - `offline_service.dart` - Cached data + sync on reconnect
 - `whitelabel_service.dart` - White-label tenant customization
-- `digital_signature_service.dart` - XAdES signing (B/T/C/X levels), RSA-SHA256/512, cert management
+- `env_loader.dart` - Environment variables (NOT API KEYS - those go to Edge Functions)
 
 ## Digital Signatures (XAdES-B Compliance)
 
@@ -324,6 +401,94 @@ All routes defined in [lib/main.dart](../lib/main.dart#L47-L59). When adding new
    ```
 
 3. **Add to Bottom Nav** (if needed in HomePage)
+
+## Critical Implementation Patterns
+
+### Secure API Calls via Edge Functions (CRITICAL)
+**Pattern**: Never expose API keys on frontend. Always use Supabase Edge Functions as a proxy:
+
+```dart
+// ✅ CORRECT: Call Edge Function (key hidden in Supabase Secrets)
+final result = await supabase.functions.invoke(
+  'supplier-ai-agent',
+  body: {'input': userInput, 'language': 'en'},
+);
+
+// ❌ WRONG: Never do this
+const groqKey = 'gsk_...';  // EXPOSED! Anyone can reverse-engineer
+await fetch('https://api.groq.com/...', headers: {'Authorization': 'Bearer $groqKey'})
+```
+
+**Implementation**: Each external API (Groq, Resend, Stripe, etc.) has an Edge Function wrapper:
+- `supabase/functions/supplier-ai-agent/` - Groq LLM (uses `Deno.env.get('GROQ_API_KEY')`)
+- `supabase/functions/send-email/` - Resend email (uses `Deno.env.get('RESEND_API_KEY')`)
+- API keys stored securely in Supabase → Settings → Secrets (encrypted at rest)
+
+**Services using this pattern**: `aura_ai_service.dart`, `email_service.dart`, `backend_api_proxy.dart`
+
+### Multi-tenancy & Security
+1. **ALWAYS filter by `org_id`**: RLS policies depend on it
+   ```dart
+   final data = await supabase
+       .from('invoices')
+       .select()
+       .eq('org_id', currentOrgId)  // NEVER SKIP
+       .eq('status', 'sent');
+   ```
+   All tables enforce RLS: queries missing `org_id` fail at DB layer.
+
+2. **API Keys**: NEVER hardcode or load from env. Use Edge Functions + Supabase Secrets:
+   - Frontend calls Edge Function via `supabase.functions.invoke()`
+   - Edge Function retrieves key: `Deno.env.get('GROQ_API_KEY')`
+   - Key never transmitted to client
+   - See [backend_api_proxy.dart](../lib/services/backend_api_proxy.dart) for pattern
+
+3. **Missing `org_id` = SECURITY BREACH** - audit all Supabase queries before deploying.
+
+### Authentication on Protected Pages
+Every protected page needs **both** `initState` check AND `build` guard:
+```dart
+@override
+void initState() {
+  super.initState();
+  _checkAuth();
+}
+
+Future<void> _checkAuth() async {
+  if (Supabase.instance.client.auth.currentUser == null) {
+    if (mounted) Navigator.pushReplacementNamed(context, '/');
+  }
+}
+
+@override
+Widget build(BuildContext context) {
+  if (Supabase.instance.client.auth.currentUser == null) {
+    return const Scaffold(body: Center(child: Text('Unauthorized')));
+  }
+  // Page content
+}
+```
+**Why both checks**: `initState` redirects on first load; `build` guards against async race conditions and hot reloads.
+
+### Service Layer Responsibilities
+- Business logic only (invoice calculations, payment processing, API calls)
+- **Never**: UI code, navigation, context references, setState
+- Always log with `_logger.i()`, `_logger.e()`, `_logger.w()`
+- Use singleton pattern for all services
+
+### Feature Personalization
+Always check before rendering feature-heavy sections:
+```dart
+final features = await FeaturePersonalizationService()
+    .getPersonalizedFeatures(userId: userId, deviceType: 'mobile');
+final hasAI = features.any((f) => f['id'] == 'ai_agents');
+```
+
+### Real-Time & Offline
+- **Real-time updates**: Use `realtime_service.dart` for live data (presence, subscriptions)
+- **Offline sync**: `offline_service.dart` caches data locally and syncs on reconnect
+- **Service worker support**: Web app caches assets for offline mode
+- Don't implement real-time directly; use the service layer abstraction
 
 ## Code Style & Conventions
 
