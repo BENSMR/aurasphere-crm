@@ -82,7 +82,7 @@ This is a **Flutter + Supabase SaaS CRM** with 40+ stateful pages, 40+ business 
 - **Routing**: Named routes in [lib/main.dart](../lib/main.dart) with auth guards on protected routes
 - **i18n**: Manual JSON lookup in `assets/i18n/{en,fr,it,de,es,ar,mt,bg}.json`
 - **Logging**: `package:logger/logger.dart` in services; `print()` with emoji in pages
-- **Services**: 40+ singleton services in `/lib/services/` (see [service inventory](#services-architecture))
+- **Services**: 40+ singleton services in `/lib/services/` with documented patterns
 
 ### Key Directories
 - `/lib/services/` (40 files) - **ALL business logic lives here**; singleton pattern; Logger for logging; **NEVER UI code**
@@ -377,7 +377,7 @@ cd build/web && python -m http.server 8000
 ```
 
 ### Route Management
-All routes defined in [lib/main.dart](../lib/main.dart#L47-L59). When adding new page:
+All routes defined in `lib/main.dart` in the routes map. When adding new page:
 
 1. **Import & Register**: Add to `routes` map
    ```dart
