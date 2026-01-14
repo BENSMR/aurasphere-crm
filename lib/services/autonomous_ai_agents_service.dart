@@ -25,6 +25,10 @@ class AutonomousAIAgentsService {
 
   /// 🤖 SCHEDULER: Run autonomous agents on a schedule (hourly, daily, weekly)
   /// Called by backend cron job or user-triggered
+  /// Plan-based access:
+  /// - Solo: Job automation only
+  /// - Team: Job automation + financial alerts
+  /// - Workshop/Enterprise: All agents (CFO, CEO, Marketing, Sales)
   Future<void> runAutonomousAgents() async {
     try {
       _logger.i('🤖 Starting autonomous agent suite...');
@@ -37,23 +41,350 @@ class AutonomousAIAgentsService {
 
       for (var org in orgs) {
         final orgId = org['id'] as String;
-        final plan = org['plan'] as String?;
+        final plan = org['plan'] as String? ?? 'solo_trades';
 
-        // Only Workshop+ plans have autonomous agents
-        if (plan != 'workshop' && plan != 'enterprise') continue;
+        _logger.i('🔄 Running agents for org: $orgId (Plan: $plan)');
 
-        _logger.i('🔄 Running agents for org: $orgId');
-
-        // Execute agents in sequence
-        await cfoAgentAutonomous(orgId: orgId);
-        await ceoAgentAutonomous(orgId: orgId);
-        await marketingAgentAutonomous(orgId: orgId);
-        await salesAgentAutonomous(orgId: orgId);
+        // Plan-based agent execution
+        if (plan == 'solo_trades') {
+          // Solo: Job automation only
+          await jobAutomationAgentLimited(orgId: orgId);
+        } else if (plan == 'small_team') {
+          // Team: All agents but with basic/limited features
+          await jobAutomationAgentLimited(orgId: orgId);
+          await cfoAgentLimited(orgId: orgId);
+          await ceoAgentLimited(orgId: orgId);
+          await marketingAgentLimited(orgId: orgId);
+          await salesAgentLimited(orgId: orgId);
+        } else if (plan == 'workshop' || plan == 'enterprise') {
+          // Workshop/Enterprise: Full agent suite with all features
+          await jobAutomationAgentLimited(orgId: orgId);
+          await cfoAgentAutonomous(orgId: orgId);
+          await ceoAgentAutonomous(orgId: orgId);
+          await marketingAgentAutonomous(orgId: orgId);
+          await salesAgentAutonomous(orgId: orgId);
+        }
       }
 
       _logger.i('✅ Autonomous agent suite completed');
     } catch (e) {
       _logger.e('❌ Error running autonomous agents: $e');
+    }
+  }
+
+  /// 📋 GET AVAILABLE AGENTS FOR PLAN
+  /// Returns list of agents available for org's subscription plan
+  Future<Map<String, dynamic>> getAvailableAgentsForPlan({
+    required String orgId,
+  }) async {
+    try {
+      final org = await supabase
+          .from('organizations')
+          .select('plan')
+          .eq('id', orgId)
+          .single();
+
+      final plan = org['plan'] as String? ?? 'solo_trades';
+
+      switch (plan) {
+        case 'solo_trades':
+          return {
+            'plan': plan,
+            'available_agents': ['job_automation'],
+            'features': [
+              'Auto-assign jobs based on availability',
+              'Job status notifications',
+            ],
+            'message': '🟦 SOLO: Limited job automation only',
+          };
+        case 'small_team':
+          return {
+            'plan': plan,
+            'available_agents': ['job_automation', 'cfo_agent', 'ceo_agent', 'marketing_agent', 'sales_agent'],
+            'features': [
+              'Auto-assign jobs based on availability',
+              'Job status notifications',
+              'Overdue invoice reminders',
+              'Monthly revenue summaries',
+              'Inactive client re-engagement emails',
+              'Client value scoring',
+            ],
+            'message': '🟩 TEAM: All agents with basic features',
+            'limitations': [
+              'CFO: Overdue reminders only (no advanced budgeting)',
+              'CEO: Monthly summaries only (no strategic planning)',
+              'Marketing: Passive re-engagement only (no campaigns)',
+              'Sales: Client scoring only (no pipeline management)',
+            ],
+          };
+        case 'workshop':
+        case 'enterprise':
+          return {
+            'plan': plan,
+            'available_agents': [
+              'cfo_agent',
+              'ceo_agent',
+              'marketing_agent',
+              'sales_agent',
+            ],
+            'features': [
+              'Full financial management (CFO)',
+              'Strategic business planning (CEO)',
+              'Marketing campaigns (Marketing)',
+              'Lead scoring & sales (Sales)',
+              'All limited plan features',
+            ],
+            'message': '🟪 WORKSHOP: Full autonomous agent suite',
+          };
+        default:
+          return {
+            'plan': plan,
+            'available_agents': [],
+            'features': [],
+            'message': '❌ Unknown plan',
+          };
+      }
+    } catch (e) {
+      _logger.e('❌ Error getting available agents: $e');
+      return {'error': e.toString()};
+    }
+  }
+
+  /// 🎯 JOB AUTOMATION AGENT - LIMITED (Solo, Team, Workshop)
+  /// Available in ALL plans - handles job assignment and status automation
+  Future<void> jobAutomationAgentLimited({required String orgId}) async {
+    try {
+      _logger.i('🎯 Job Automation Agent: Starting for org: $orgId');
+
+      // Get unassigned jobs (status: pending, not assigned to team member)
+      final pendingJobs = await supabase
+          .from('jobs')
+          .select('id, title, assigned_to, priority, created_at')
+          .eq('org_id', orgId)
+          .eq('status', 'pending')
+          .isFilter('assigned_to', null); // Not yet assigned
+
+      _logger.i('📋 Found ${pendingJobs.length} unassigned jobs');
+
+      // Get team members with availability
+      final teamMembers = await supabase
+          .from('org_members')
+          .select('user_id, email, role')
+          .eq('org_id', orgId)
+          .neq('role', 'owner');
+
+      // Auto-assign jobs to available team members (round-robin)
+      for (int i = 0; i < pendingJobs.length; i++) {
+        final job = pendingJobs[i];
+        final assignee = teamMembers[i % teamMembers.length];
+
+        await supabase
+            .from('jobs')
+            .update({
+              'assigned_to': assignee['user_id'],
+              'status': 'assigned',
+              'assigned_at': DateTime.now().toIso8601String(),
+            })
+            .eq('id', job['id']);
+
+        _logger.i('✅ Job "${job['title']}" auto-assigned to ${assignee['email']}');
+      }
+
+      _logger.i('✅ Job automation completed');
+    } catch (e) {
+      _logger.e('❌ Job automation error: $e');
+    }
+  }
+
+  /// 💰 CFO AGENT - LIMITED (Team, Workshop+)
+  /// Limited to overdue reminders and alerts only
+  Future<void> cfoAgentLimited({required String orgId}) async {
+    try {
+      _logger.i('💰 CFO Agent (Limited): Starting for org: $orgId');
+
+      // ONLY: Overdue invoice reminders
+      final overdueInvoices = await supabase
+          .from('invoices')
+          .select('id, client_id, amount, due_date, reminder_sent_at')
+          .eq('org_id', orgId)
+          .eq('status', 'sent')
+          .lt('due_date', DateTime.now().toIso8601String());
+
+      _logger.i('💳 Found ${overdueInvoices.length} overdue invoices');
+
+      for (var invoice in overdueInvoices) {
+        // Skip if reminder already sent today
+        final lastReminder = invoice['reminder_sent_at'] as String?;
+        if (lastReminder != null) {
+          final lastDate = DateTime.parse(lastReminder);
+          if (DateTime.now().difference(lastDate).inHours < 24) {
+            continue; // Skip - already reminded today
+          }
+        }
+
+        final clientId = invoice['client_id'];
+        final client = await supabase
+            .from('clients')
+            .select('email, name')
+            .eq('id', clientId)
+            .maybeSingle();
+
+        if (client == null) continue;
+
+        // AUTO-SEND REMINDER EMAIL via Edge Function
+        try {
+          await supabase.functions.invoke('send-email', body: {
+            'to': client['email'],
+            'subject': '⏰ Invoice Overdue Reminder - Action Required',
+            'template': 'overdue_reminder',
+            'data': {
+              'client_name': client['name'],
+              'invoice_number': invoice['id'],
+              'amount': invoice['amount'],
+            }
+          });
+
+          // Mark reminder sent
+          await supabase
+              .from('invoices')
+              .update({'reminder_sent_at': DateTime.now().toIso8601String()})
+              .eq('id', invoice['id']);
+
+          _logger.i('📧 Reminder sent to ${client['email']}');
+        } catch (e) {
+          _logger.w('⚠️ Failed to send reminder: $e');
+        }
+      }
+
+      _logger.i('✅ Limited CFO agent completed (overdue reminders only)');
+    } catch (e) {
+      _logger.e('❌ Limited CFO agent error: $e');
+    }
+  }
+
+  /// 🎯 CEO AGENT - LIMITED (Team Plan)
+  /// Limited to monthly performance summary only
+  Future<void> ceoAgentLimited({required String orgId}) async {
+    try {
+      _logger.i('🎯 CEO Agent (Limited): Starting for org: $orgId');
+
+      // Get monthly revenue summary
+      final startOfMonth = DateTime(DateTime.now().year, DateTime.now().month);
+      final invoices = await supabase
+          .from('invoices')
+          .select('amount, status, created_at')
+          .eq('org_id', orgId)
+          .gte('created_at', startOfMonth.toIso8601String());
+
+      double totalRevenue = 0;
+      double paidRevenue = 0;
+      int totalInvoices = invoices.length;
+
+      for (var invoice in invoices) {
+        final amount = (invoice['amount'] as num).toDouble();
+        final status = invoice['status'] as String;
+
+        totalRevenue += amount;
+        if (status == 'paid') {
+          paidRevenue += amount;
+        }
+      }
+
+      _logger.i('📊 Monthly Summary: \$${totalRevenue.toStringAsFixed(2)} total, \$${paidRevenue.toStringAsFixed(2)} paid');
+    } catch (e) {
+      _logger.e('❌ Limited CEO agent error: $e');
+    }
+  }
+
+  /// 📢 MARKETING AGENT - LIMITED (Team Plan)
+  /// Limited to email reminders for inactive clients only
+  Future<void> marketingAgentLimited({required String orgId}) async {
+    try {
+      _logger.i('📢 Marketing Agent (Limited): Starting for org: $orgId');
+
+      // Find clients with no invoices in last 30 days (inactive)
+      final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+      
+      final inactiveClients = await supabase
+          .from('clients')
+          .select('id, email, name, last_invoice_date')
+          .eq('org_id', orgId)
+          .or('last_invoice_date.is.null,last_invoice_date.lt.${thirtyDaysAgo.toIso8601String()}');
+
+      _logger.i('📋 Found ${inactiveClients.length} inactive clients');
+
+      for (var client in inactiveClients) {
+        final lastEmail = client['last_engagement_email'] as String?;
+        
+        // Skip if already emailed this month
+        if (lastEmail != null) {
+          final lastDate = DateTime.parse(lastEmail);
+          if (DateTime.now().difference(lastDate).inDays < 30) {
+            continue;
+          }
+        }
+
+        try {
+          // Send re-engagement email
+          await supabase.functions.invoke('send-email', body: {
+            'to': client['email'],
+            'subject': 'We miss you! Special offer inside 💙',
+            'template': 'reengagement',
+            'data': {
+              'client_name': client['name'],
+              'days_since_contact': DateTime.now().difference(DateTime.parse(client['last_invoice_date'] ?? DateTime.now().toIso8601String())).inDays,
+            }
+          });
+
+          _logger.i('📧 Re-engagement email sent to ${client['email']}');
+        } catch (e) {
+          _logger.w('⚠️ Failed to send engagement email: $e');
+        }
+      }
+
+      _logger.i('✅ Limited marketing agent completed');
+    } catch (e) {
+      _logger.e('❌ Limited marketing agent error: $e');
+    }
+  }
+
+  /// 💼 SALES AGENT - LIMITED (Team Plan)
+  /// Limited to lead scoring on existing clients only
+  Future<void> salesAgentLimited({required String orgId}) async {
+    try {
+      _logger.i('💼 Sales Agent (Limited): Starting for org: $orgId');
+
+      // Score existing clients by value
+      final clients = await supabase
+          .from('clients')
+          .select('id, email, name, total_spent, invoice_count')
+          .eq('org_id', orgId);
+
+      int scoredCount = 0;
+      for (var client in clients) {
+        final totalSpent = (client['total_spent'] as num?)?.toDouble() ?? 0;
+        final invoiceCount = (client['invoice_count'] as num?)?.toInt() ?? 0;
+
+        // Calculate client value score (0-100)
+        double score = 0;
+        if (totalSpent > 1000) score += 30;
+        if (totalSpent > 5000) score += 20;
+        if (invoiceCount > 5) score += 25;
+        if (invoiceCount > 10) score += 25;
+
+        // Update client score
+        await supabase
+            .from('clients')
+            .update({'client_value_score': score.toInt()})
+            .eq('id', client['id']);
+
+        scoredCount++;
+      }
+
+      _logger.i('⭐ Scored $scoredCount clients for value');
+      _logger.i('✅ Limited sales agent completed');
+    } catch (e) {
+      _logger.e('❌ Limited sales agent error: $e');
     }
   }
 
