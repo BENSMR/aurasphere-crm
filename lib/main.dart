@@ -7,7 +7,7 @@ import 'forgot_password_page.dart';
 import 'dashboard_page.dart';
 import 'home_page.dart';
 
-const supabaseUrl = 'https://igkvgrvrdpbmunxwhkax.supabase.co';
+const supabaseUrl = 'https://fppmuibvpxrkwmymszhd.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlna3ZncnZyZHBibXVueHdoa2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQyNDUyMDAsImV4cCI6MjAyMDI0NTIwMH0.LMQFPSP8JVqVdP_sKHbQWqfyV8tHzM1KI5tLQ7vPczs';
 
 void main() async {
