@@ -20,6 +20,7 @@ class _LandingPageAnimatedState extends State<LandingPageAnimated> {
             _buildNavBar(isMobile),
             _buildHeroSection(isMobile),
             _buildValueSection(isMobile),
+            _buildCoreFeatureSection(isMobile),
             _buildStatsSection(isMobile),
             _buildPricingSection(isMobile),
             _buildTestimonialsSection(isMobile),
@@ -276,6 +277,118 @@ class _LandingPageAnimatedState extends State<LandingPageAnimated> {
     );
   }
 
+  Widget _buildCoreFeatureSection(bool isMobile) {
+    final mobileFeatures = [
+      'Manage contacts in one place',
+      'Organize tasks & deadlines',
+      'Scan receipts with OCR',
+      'Track wallet & transactions',
+      'Control integrations',
+      'Real-time analytics',
+    ];
+
+    final unifiedFeatures = [
+      'All data synced real-time across devices',
+      'Log expense on phone → See on desktop',
+      'Update invoice on desktop → Visible on mobile',
+      'Multiple users editing → All changes sync',
+      'Mobile works offline → Auto-syncs',
+    ];
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? 40 : 60,
+        horizontal: isMobile ? 16 : 40,
+      ),
+      color: const Color(0xFFF8FAFC),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Core CRM Dashboard',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            '📱 Best features on mobile • 💻 Full suite on desktop • 🔄 Real-time sync across all devices',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Color(0xFF6C757D),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 40),
+          
+          // Mobile Features
+          const Text(
+            '📱 Mobile (6 Best Features)',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: mobileFeatures
+                .map((feature) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          const Text('✓ ', style: TextStyle(color: Color(0xFF007BFF), fontWeight: FontWeight.bold, fontSize: 16)),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: const TextStyle(fontSize: 13, color: Color(0xFF6C757D)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 32),
+
+          // Unified Platform Features
+          const Text(
+            '✨ Unified Platform Features',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: unifiedFeatures
+                .map((feature) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          const Text('✅ ', style: TextStyle(fontSize: 14)),
+                          Expanded(
+                            child: Text(
+                              feature,
+                              style: const TextStyle(fontSize: 13, color: Color(0xFF6C757D)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStatsSection(bool isMobile) {
     return Container(
       padding: EdgeInsets.symmetric(
@@ -341,21 +454,21 @@ class _LandingPageAnimatedState extends State<LandingPageAnimated> {
     final plans = [
       {
         'name': 'Solo',
-        'price': '\$29/mo',
+        'price': '\$9.99/mo',
         'desc': 'For solopreneurs',
         'features': ['1 user', 'Core CRM', 'Jobs & Invoices', 'Email support'],
         'popular': false,
       },
       {
         'name': 'Team',
-        'price': '\$79/mo',
+        'price': '\$15/mo',
         'desc': 'Most popular',
         'features': ['3 users', 'Everything in Solo', 'Team tools', 'AI insights', 'Priority support'],
         'popular': true,
       },
       {
         'name': 'Workshop',
-        'price': '\$199/mo',
+        'price': '\$29/mo',
         'desc': 'For teams',
         'features': ['7 users', 'Everything in Team', 'Unlimited features', 'API access', '24/7 support'],
         'popular': false,

@@ -14,11 +14,26 @@ class PaddlePaymentService {
   static const String sellerId = String.fromEnvironment('PADDLE_SELLER_ID');
 
   // PRODUCT & PRICE IDs (Get from Paddle dashboard)
+  // Get from: https://vendors.paddle.com/pricing-plans
   static const Map<String, String> priceIds = {
-    'solo': 'price_XXXXXXXXXXXXXXXX',
-    'team': 'price_XXXXXXXXXXXXXXXX',
-    'workshop': 'price_XXXXXXXXXXXXXXXX',
+    'solo': '123456',        // Replace with real Paddle Price ID
+    'team': '123457',
+    'workshop': '123458',
   };
+  
+  // CONFIGURATION HELPER - warns if price IDs are still placeholders
+  static void validatePriceIds() {
+    final missingIds = <String>[];
+    priceIds.forEach((plan, id) {
+      if (id.contains('XXXXXXXX') || id == '123456' || id == '123457' || id == '123458' || id.startsWith('price_')) {
+        missingIds.add('$plan: $id');
+      }
+    });
+    if (missingIds.isNotEmpty) {
+      print('⚠️  WARNING: Missing Paddle price IDs: $missingIds');
+      print('   Get these from: https://vendors.paddle.com/pricing-plans');
+    }
+  }
 
   // CREATE CUSTOMER
   static Future<String?> createCustomer({

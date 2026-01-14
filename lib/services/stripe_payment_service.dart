@@ -15,11 +15,26 @@ class StripePaymentService {
   static const String publishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
 
   // PRODUCT & PRICE IDs (Set these in Stripe Dashboard)
+  // Get from: https://dashboard.stripe.com/products
   static const Map<String, String> priceIds = {
-    'solo': 'price_solo_XXXXXXXXXXXXXXXX', // Update with real ID
-    'team': 'price_team_XXXXXXXXXXXXXXXX',
-    'workshop': 'price_workshop_XXXXXXXXXXXXXXXX',
+    'solo': 'price_1234567890abcdef', // Replace with real Stripe Price ID
+    'team': 'price_1234567890bcdefg',
+    'workshop': 'price_1234567890cdefgh',
   };
+  
+  // CONFIGURATION HELPER - warns if price IDs are still placeholders
+  static void validatePriceIds() {
+    final missingIds = <String>[];
+    priceIds.forEach((plan, id) {
+      if (id.contains('XXXXXXXX') || id.contains('placeholder') || id.startsWith('price_') && id.length < 20) {
+        missingIds.add('$plan: $id');
+      }
+    });
+    if (missingIds.isNotEmpty) {
+      print('⚠️  WARNING: Missing Stripe price IDs: $missingIds');
+      print('   Get these from: https://dashboard.stripe.com/products');
+    }
+  }
 
   // CREATE CUSTOMER
   static Future<String?> createCustomer({

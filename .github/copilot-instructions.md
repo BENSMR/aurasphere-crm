@@ -1,10 +1,10 @@
 # AuraSphere CRM - AI Coding Agent Instructions
 
-**Last Updated**: January 2026 | Flutter 3.9.2 | Supabase 2.12.0
+**Last Updated**: January 14, 2026 | Flutter 3.9.2 | Supabase 2.12.0
 
 ## 🎯 Quick Start for AI Agents
 
-This is a **Flutter + Supabase SaaS CRM** with 40+ stateful pages, 40+ business logic services, and strict architectural constraints. The codebase enforces:
+This is a **Flutter + Supabase SaaS CRM** for tradespeople with 30+ feature pages, 43 business logic services, and strict architectural constraints. The codebase enforces:
 - **SetState-only** state management (no Provider/Riverpod)
 - **Service layer** for all business logic (singleton pattern, never contains UI)
 - **Multi-tenant RLS** on every Supabase query (must filter by `org_id`)
@@ -82,13 +82,13 @@ This is a **Flutter + Supabase SaaS CRM** with 40+ stateful pages, 40+ business 
 - **Routing**: Named routes in [lib/main.dart](../lib/main.dart) with auth guards on protected routes
 - **i18n**: Manual JSON lookup in `assets/i18n/{en,fr,it,de,es,ar,mt,bg}.json`
 - **Logging**: `package:logger/logger.dart` in services; `print()` with emoji in pages
-- **Services**: 40+ singleton services in `/lib/services/` with documented patterns
+- **Services**: 43 singleton services in `/lib/services/` with documented patterns
 
 ### Key Directories
-- `/lib/services/` (40 files) - **ALL business logic lives here**; singleton pattern; Logger for logging; **NEVER UI code**
-  - Example files: `invoice_service.dart`, `aura_ai_service.dart`, `stripe_service.dart`, `feature_personalization_service.dart`
+- `/lib/services/` (43 files) - **ALL business logic lives here**; singleton pattern; Logger for logging; **NEVER UI code**
+  - Example files: `invoice_service.dart`, `aura_ai_service.dart`, `stripe_service.dart`, `feature_personalization_service.dart`, `digital_signature_service.dart`
   - **Pattern**: Static final instance, private constructor, factory method, always call `.single()` or `.maybeSingle()` on Supabase queries
-- `/lib/` - Pages & widgets; ~25 `*_page.dart` files; each page manages only local state (loading, lists, form data)
+- `/lib/` - Pages & widgets; ~30 `*_page.dart` files; each page manages only local state (loading, lists, form data)
   - Every protected page must check `currentUser == null` in both `initState` + `build` 
   - Use `setState()` with `if (mounted)` safety checks in catch/finally blocks
 - `/lib/widgets/` - Reusable UI components (ModernButton, ModernCard, ModernPageTransition)
@@ -268,7 +268,7 @@ final businessType = prefs?['business_type'];  // 'freelancer' or 'trades'
 ```
 See [lib/services/feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for bulk feature management.
 
-## Services Architecture (40 files)
+## Services Architecture (43 files)
 
 ### Core Business Logic
 - `invoice_service.dart` - Overdue reminders, payment status tracking
@@ -276,13 +276,16 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `tax_service.dart` - 40+ country tax rates + calculation
 - `ocr_service.dart` - Receipt image → JSON extraction
 - `pdf_service.dart` - Invoice PDF generation + templating
+- `pdf_signature_integration.dart` - PDF digital signature integration
 - `company_profile_service.dart` - Organization profile, logo, branding
 - `digital_signature_service.dart` - XAdES-B/T/C/X invoice signing, RSA-SHA256, certificate management
+- `cloud_expense_service.dart` - Cloud-based expense tracking and categorization
+- `waste_detection_service.dart` - AI-based waste/cost optimization detection
 
 ### Team & Device Management
 - `team_member_control_service.dart` - Team member codes, permissions, approval workflow (owner-controlled)
 - `device_management_service.dart` - Mobile/tablet device registration, reference codes, access control
-- `feature_personalization_service.dart` - Owner control for device features (mobile 6 features / tablet 8 features)
+- `feature_personalization_service.dart` - Owner control for device features (mobile 6 features / tablet 8 features per subscription tier)
 
 ### Payment & Subscriptions
 - `stripe_service.dart` - Stripe checkout, invoice sync, webhook handling
@@ -299,9 +302,9 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `supplier_ai_agent.dart` - Supplier cost optimization
 - `marketing_automation_service.dart` - Email campaigns, engagement tracking
 
-### Feature Personalization
+### Feature Personalization & Helpers
 - `feature_personalization_helper.dart` - Mobile/tablet feature helpers
-- See [feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for owner control layer
+- See [feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for owner control layer (device limits by subscription: Solo 2 mobile/1 tablet, Team 3 mobile/2 tablet, Workshop 5 mobile/3 tablet)
 
 ### Integrations
 - `whatsapp_service.dart` - Message dispatch, media upload, delivery logs
@@ -512,11 +515,11 @@ try {
 Breakpoints and feature limits per device type:
 ```dart
 final width = MediaQuery.of(context).size.width;
-final isMobile = width < 600;   // Max 8 features
-final isTablet = width >= 600 && width < 1200;  // Max 12 features
+final isMobile = width < 600;   // Max 6 features (subscription tier dependent)
+final isTablet = width >= 600 && width < 1200;  // Max 8 features (subscription tier dependent)
 final isDesktop = width >= 1200;  // Desktop web
 ```
-Note: Feature personalization enforces max features per device type (see `FeaturePersonalizationService`)
+Note: Feature personalization enforces max features per device type and subscription plan (see `FeaturePersonalizationService`)
 
 ### Internationalization (i18n)
 Manual JSON-based i18n with 9 language support (en, fr, it, de, es, ar, mt, bg):
@@ -568,109 +571,21 @@ final canAccessBilling = isOwner && org['stripe_status'] != 'cancelled';
 - `whatsapp_numbers` - Org phone accounts; `org_id, phone, account_sid, auth_token`
 - `integrations` - Third-party creds; `org_id, provider(stripe|paddle|hubspot), config(JSONB), active`
 
-## Critical Implementation Patterns
-
-### Secure API Calls via Edge Functions (CRITICAL)
-**Pattern**: Never expose API keys on frontend. Always use Supabase Edge Functions as a proxy:
-
-```dart
-// ✅ CORRECT: Call Edge Function (key hidden in Supabase Secrets)
-final result = await supabase.functions.invoke(
-  'supplier-ai-agent',
-  body: {'input': userInput, 'language': 'en'},
-);
-
-// ❌ WRONG: Never do this
-const groqKey = 'gsk_...';  // EXPOSED! Anyone can reverse-engineer
-await fetch('https://api.groq.com/...', headers: {'Authorization': 'Bearer $groqKey'})
-```
-
-**Implementation**: Each external API (Groq, Resend, Stripe, etc.) has an Edge Function wrapper:
-- `supabase/functions/supplier-ai-agent/` - Groq LLM (uses `Deno.env.get('GROQ_API_KEY')`)
-- `supabase/functions/send-email/` - Resend email (uses `Deno.env.get('RESEND_API_KEY')`)
-- API keys stored securely in Supabase → Settings → Secrets (encrypted at rest)
-
-**Services using this pattern**: `aura_ai_service.dart`, `email_service.dart`, `backend_api_proxy.dart`
-
-### Multi-tenancy & Security
-1. **ALWAYS filter by `org_id`**: RLS policies depend on it
-   ```dart
-   final data = await supabase
-       .from('invoices')
-       .select()
-       .eq('org_id', currentOrgId)  // NEVER SKIP
-       .eq('status', 'sent');
-   ```
-   All tables enforce RLS: queries missing `org_id` fail at DB layer.
-
-2. **API Keys**: NEVER hardcode or load from env. Use Edge Functions + Supabase Secrets:
-   - Frontend calls Edge Function via `supabase.functions.invoke()`
-   - Edge Function retrieves key: `Deno.env.get('GROQ_API_KEY')`
-   - Key never transmitted to client
-   - See [backend_api_proxy.dart](../lib/services/backend_api_proxy.dart) for pattern
-
-3. **Missing `org_id` = SECURITY BREACH** - audit all Supabase queries before deploying.
-
-### Authentication on Protected Pages
-Every protected page needs **both** `initState` check AND `build` guard:
-```dart
-@override
-void initState() {
-  super.initState();
-  _checkAuth();
-}
-
-Future<void> _checkAuth() async {
-  if (Supabase.instance.client.auth.currentUser == null) {
-    if (mounted) Navigator.pushReplacementNamed(context, '/');
-  }
-}
-
-@override
-Widget build(BuildContext context) {
-  if (Supabase.instance.client.auth.currentUser == null) {
-    return const Scaffold(body: Center(child: Text('Unauthorized')));
-  }
-  // Page content
-}
-```
-**Why both checks**: `initState` redirects on first load; `build` guards against async race conditions and hot reloads.
-
-### Service Layer Responsibilities
-- Business logic only (invoice calculations, payment processing, API calls)
-- **Never**: UI code, navigation, context references, setState
-- Always log with `_logger.i()`, `_logger.e()`, `_logger.w()`
-- Use singleton pattern for all services
-
-### Feature Personalization
-Always check before rendering feature-heavy sections:
-```dart
-final features = await FeaturePersonalizationService()
-    .getPersonalizedFeatures(userId: userId, deviceType: 'mobile');
-final hasAI = features.any((f) => f['id'] == 'ai_agents');
-```
-
-### Real-Time & Offline
-- **Real-time updates**: Use `realtime_service.dart` for live data (presence, subscriptions)
-- **Offline sync**: `offline_service.dart` caches data locally and syncs on reconnect
-- **Service worker support**: Web app caches assets for offline mode
-- Don't implement real-time directly; use the service layer abstraction
-
-### Key Audit Points
+## Key Audit Points
 When modifying core tables, audit impacts in:
 - `invoice_service.dart` - invoice calculations, reminders, payment status
 - `trial_service.dart` - trial expiry, plan upgrades
 - `integration_service.dart` - third-party syncs (HubSpot, QuickBooks, Slack)
 - `stripe_service.dart` / `paddle_service.dart` - subscription webhooks
 
-### Common Patterns to Follow
+## Common Patterns to Follow
 1. **Error messages**: Always include emoji + context: `print('❌ Failed to fetch invoices: $e')`
 2. **Mounted checks**: Always `if (mounted)` before setState in catch/finally blocks
 3. **Async loading state**: Use local `bool loading = true` state, set in try/finally
 4. **Supabase errors**: Never silently catch; always log and optionally rethrow
 5. **Route additions**: Add to `routes` map in main.dart → add auth check in `onGenerateRoute`
 6. **org_id in queries**: Every Supabase query must filter by `org_id` (RLS enforced)
-7. **Feature limits**: Enforce mobile (8 features) vs tablet (12 features) in [FeaturePersonalizationService](../lib/services/feature_personalization_service.dart)
+7. **Feature limits**: Enforce mobile (6 features) vs tablet (8 features) per subscription tier in [FeaturePersonalizationService](../lib/services/feature_personalization_service.dart)
 8. **Edge Function calls**: Use `supabase.functions.invoke()` never direct API calls with keys
 
 ## Troubleshooting & Common Gotchas
