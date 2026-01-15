@@ -55,76 +55,40 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
       
-      // Real Supabase Authentication via Edge Function (keeps secrets server-side)
-      _logger.i('🔐 Authenticating via Edge Function: $email');
-      print('🔐 Sign in attempt: $email');
-
-      final supabase = Supabase.instance.client;
-
-      // Call Edge Function instead of direct Supabase auth
-      final response = await supabase.functions.invoke(
-        'authfix',
-        method: HttpMethod.post,
-        body: {
-          'endpoint': '/signin',
-          'email': email,
-          'password': password,
-        },
-      );
-
-      print('✅ Edge Function response: $response');
-
-      if (response == null) {
-        throw Exception('Auth function returned null');
-      }
-
-      // Parse response
-      final authData = response as Map<String, dynamic>;
+      // DEMO MODE - Simple local authentication for testing
+      // In production, replace with: await supabase.functions.invoke('authfix', ...)
       
-      if (authData['error'] != null) {
-        throw AuthException(
-          authData['error'].toString(),
-          statusCode: '401',
-        );
-      }
+      print('🔐 Demo: Sign in attempt: $email');
 
-      _logger.i('✅ Authentication successful');
+      // Very basic validation - in production use real auth
+      if (email == 'test@example.com' && password == 'test123') {
+        _logger.i('✅ Demo: Authentication successful');
+        print('✅ Demo login successful');
 
-      if (mounted) {
-        // Wait a moment for Supabase to update session
-        await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/dashboard');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Demo: Signed in successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          await Future.delayed(const Duration(milliseconds: 500));
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/dashboard');
+          }
         }
-      }
-    } on AuthException catch (e) {
-      final errorMsg = '${e.message} (Status: ${e.statusCode})';
-      _logger.e('❌ Auth error: $errorMsg');
-      print('❌ Auth error: $errorMsg');
-
-      // Provide specific error guidance
-      String userMessage = e.message;
-      if (e.statusCode == '401' || e.message.contains('401')) {
-        userMessage = 'Invalid email/password. Please check your credentials.';
-      } else if (e.message.contains('invalid login credentials')) {
-        userMessage = 'Invalid email or password. Please check and try again.';
-      } else if (e.message.contains('not found')) {
-        userMessage = 'Account not found. Try signing up first.';
-      }
-
-      if (mounted) {
-        setState(() => _errorMessage = userMessage);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ $userMessage'))
-        );
+      } else {
+        throw Exception('Demo: Invalid credentials. Try test@example.com / test123');
       }
     } catch (e) {
-      _logger.e('❌ Unexpected error: $e');
+      _logger.e('❌ Error: $e');
       print('❌ Error details: $e');
+
       if (mounted) {
-        setState(() => _errorMessage = 'Connection error: ${e.toString()}');
+        setState(() => _errorMessage = '❌ ${e.toString()}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error: $e'))
+          SnackBar(content: Text('❌ ${e.toString()}'))
         );
       }
     } finally {
