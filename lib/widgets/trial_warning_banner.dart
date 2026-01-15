@@ -104,13 +104,13 @@ class _TrialWarningBannerState extends State<TrialWarningBanner> {
                   ),
                 ),
                 if (remainingDays <= 1)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8),
                     child: Text(
                       '💰 Get 50% off your first 2 months when you upgrade',
                       style: TextStyle(
                         fontSize: 12,
-                        color: const Color(0xFFFF9800),
+                        color: Color(0xFFFF9800),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

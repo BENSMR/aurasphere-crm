@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(width: 16),
           ],
           bottom: const TabBar(
-            isScrollable: false,
+            isScrollable: true,
             tabs: [
               Tab(icon: Icon(Icons.work), text: 'Jobs'),
               Tab(icon: Icon(Icons.people), text: 'Leads'),
@@ -202,6 +202,8 @@ class _HomePageState extends State<HomePage> {
               Tab(icon: Icon(Icons.analytics), text: 'Performance'),
               Tab(icon: Icon(Icons.group), text: 'Team'),
               Tab(icon: Icon(Icons.business), text: 'Suppliers'),
+              Tab(icon: Icon(Icons.cloud), text: '☁️ CloudGuard'),
+              Tab(icon: Icon(Icons.handshake), text: 'Partners'),
               Tab(icon: Icon(Icons.smart_toy), text: 'AI Chat'),
             ],
           ),
@@ -215,6 +217,8 @@ class _HomePageState extends State<HomePage> {
             const PerformancePage(),
             const TeamPage(),
             _buildSupplierTab(),
+            _buildCloudGuardTab(),
+            _buildPartnerTab(),
             _buildAiChatTab(),
           ],
         ),
@@ -252,6 +256,109 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  // CLOUDGUARD TAB - FinOps Dashboard
+  Widget _buildCloudGuardTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.cloud, size: 64, color: Colors.blueAccent),
+          const SizedBox(height: 16),
+          const Text(
+            'CloudGuard FinOps Dashboard',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '☁️ Monitor cloud costs, detect waste, optimize spending',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/cloudguard');
+            },
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Open CloudGuard'),
+          ),
+          const SizedBox(height: 16),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    'CloudGuard Features:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('• Real-time cloud cost monitoring'),
+                  Text('• AI-powered waste detection'),
+                  Text('• Monthly savings recommendations'),
+                  Text('• Service breakdown analysis'),
+                  Text('• Budget alerts & compliance'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // PARTNER PORTAL TAB - Reseller & Commission Program
+  Widget _buildPartnerTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.handshake, size: 64, color: Colors.green),
+          const SizedBox(height: 16),
+          const Text(
+            'Partner Portal',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '🤝 Reseller program, training, certification & commissions',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/partner-portal');
+            },
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Open Partner Portal'),
+          ),
+          const SizedBox(height: 16),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Partner Benefits:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text('• 20% recurring commissions'),
+                  Text('• Sales training & certification'),
+                  Text('• Demo & pitch deck resources'),
+                  Text('• Real-time commission tracking'),
+                  Text('• ROI calculator for prospects'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // AI CHAT TAB - 5 AI Agents
   Widget _buildAiChatTab() {
     return SingleChildScrollView(

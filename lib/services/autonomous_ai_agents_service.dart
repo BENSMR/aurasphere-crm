@@ -278,7 +278,6 @@ class AutonomousAIAgentsService {
 
       double totalRevenue = 0;
       double paidRevenue = 0;
-      int totalInvoices = invoices.length;
 
       for (var invoice in invoices) {
         final amount = (invoice['amount'] as num).toDouble();
@@ -469,7 +468,7 @@ class AutonomousAIAgentsService {
           .select('amount, status, created_at')
           .eq('org_id', orgId)
           .eq('status', 'paid')
-          .gte('created_at', DateTime.now().subtract(Duration(days: 90)).toIso8601String());
+          .gte('created_at', DateTime.now().subtract(const Duration(days: 90)).toIso8601String());
 
       double totalRevenue = 0;
       for (var invoice in last90days) {
@@ -499,7 +498,7 @@ class AutonomousAIAgentsService {
           .from('clients')
           .select('id, email, name, last_invoice_date')
           .eq('org_id', orgId)
-          .lt('last_invoice_date', DateTime.now().subtract(Duration(days: 30)).toIso8601String());
+          .lt('last_invoice_date', DateTime.now().subtract(const Duration(days: 30)).toIso8601String());
 
       // AUTO-SEND ENGAGEMENT EMAIL TO INACTIVE CLIENTS
       for (var client in inactiveClients) {
@@ -529,7 +528,7 @@ class AutonomousAIAgentsService {
           .select('id, name, email, created_at, total_spent')
           .eq('org_id', orgId)
           .eq('status', 'lead')
-          .gte('created_at', DateTime.now().subtract(Duration(days: 7)).toIso8601String());
+          .gte('created_at', DateTime.now().subtract(const Duration(days: 7)).toIso8601String());
 
       // AUTO-QUALIFY LEADS
       for (var lead in recentLeads) {
@@ -580,7 +579,7 @@ class AutonomousAIAgentsService {
           .from('invoices')
           .select('amount, status, created_at')
           .eq('org_id', orgId)
-          .gte('created_at', DateTime.now().subtract(Duration(days: 90)).toIso8601String());
+          .gte('created_at', DateTime.now().subtract(const Duration(days: 90)).toIso8601String());
 
       // Get client data
       final clients = await supabase
@@ -665,7 +664,7 @@ class AutonomousAIAgentsService {
           .from('jobs')
           .select('id, assigned_to, status, created_at, updated_at')
           .eq('org_id', orgId)
-          .gte('created_at', DateTime.now().subtract(Duration(days: 30)).toIso8601String());
+          .gte('created_at', DateTime.now().subtract(const Duration(days: 30)).toIso8601String());
 
       // Calculate team utilization
       Map<String, int> jobsPerTechnician = {};
@@ -738,7 +737,7 @@ class AutonomousAIAgentsService {
           .from('expenses')
           .select('amount, category, created_at')
           .eq('org_id', orgId)
-          .gte('created_at', DateTime.now().subtract(Duration(days: 90)).toIso8601String());
+          .gte('created_at', DateTime.now().subtract(const Duration(days: 90)).toIso8601String());
 
       // Calculate cash flow metrics
       double totalInvoiced = 0;
@@ -842,8 +841,8 @@ class AutonomousAIAgentsService {
 
     // Compare last 30 days to previous 30 days
     DateTime now = DateTime.now();
-    DateTime thirtyDaysAgo = now.subtract(Duration(days: 30));
-    DateTime sixtyDaysAgo = now.subtract(Duration(days: 60));
+    DateTime thirtyDaysAgo = now.subtract(const Duration(days: 30));
+    DateTime sixtyDaysAgo = now.subtract(const Duration(days: 60));
 
     double recentRevenue = 0;
     double priorRevenue = 0;
@@ -866,7 +865,7 @@ class AutonomousAIAgentsService {
   double calculateRetentionRate(List<Map<String, dynamic>> clients) {
     if (clients.isEmpty) return 0;
 
-    DateTime thirtyDaysAgo = DateTime.now().subtract(Duration(days: 30));
+    DateTime thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
     int retainedClients = 0;
 
     for (var client in clients) {
@@ -922,7 +921,7 @@ class AutonomousAIAgentsService {
           .eq('org_id', orgId);
 
       final activeUsers = orgUsers.where((u) => u['status'] == 'active').length;
-      _logger.i('✅ Admin: System health check passed (${activeUsers} active users)');
+      _logger.i('✅ Admin: System health check passed ($activeUsers active users)');
     } catch (e) {
       _logger.e('❌ Admin Agent Error: $e');
     }

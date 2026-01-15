@@ -117,6 +117,42 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: ModernTheme.spacingXL),
 
+              // FinOps & Business Section
+              const Text('Business Tools', style: ModernTheme.headline4),
+              const SizedBox(height: ModernTheme.spacingM),
+              Container(
+                padding: const EdgeInsets.all(ModernTheme.spacingM),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue.shade200),
+                  borderRadius: BorderRadius.circular(ModernTheme.radiusMedium),
+                  color: Colors.blue.shade50,
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.cloud, color: Colors.blueAccent),
+                  title: const Text('CloudGuard FinOps', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Monitor cloud costs, detect waste & optimize spending'),
+                  trailing: const Icon(Icons.arrow_forward, color: Colors.blue),
+                  onTap: () => Navigator.pushNamed(context, '/cloudguard'),
+                ),
+              ),
+              const SizedBox(height: ModernTheme.spacingM),
+              Container(
+                padding: const EdgeInsets.all(ModernTheme.spacingM),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.green.shade200),
+                  borderRadius: BorderRadius.circular(ModernTheme.radiusMedium),
+                  color: Colors.green.shade50,
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.handshake, color: Colors.green),
+                  title: const Text('Partner Portal', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Manage reseller program, commissions & training'),
+                  trailing: const Icon(Icons.arrow_forward, color: Colors.green),
+                  onTap: () => Navigator.pushNamed(context, '/partner-portal'),
+                ),
+              ),
+              const SizedBox(height: ModernTheme.spacingXL),
+
               // Danger Zone
               const Text('Danger Zone', style: ModernTheme.headline4),
               const SizedBox(height: ModernTheme.spacingM),
@@ -188,7 +224,7 @@ class _SettingsPageState extends State<SettingsPage> {
         trailing: Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: const Color(0xFF007BFF),
+          activeThumbColor: const Color(0xFF007BFF),
         ),
       ),
     );

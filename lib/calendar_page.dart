@@ -128,7 +128,7 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
               const SizedBox(height: 8),
               if (job['description'] != null) ...[
-                Text('Description:'),
+                const Text('Description:'),
                 const SizedBox(height: 4),
                 Text(job['description']),
               ],

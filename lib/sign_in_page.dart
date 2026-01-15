@@ -173,7 +173,7 @@ class _SignInPageState extends State<SignInPage> {
                               style: ModernTheme.headline2,
                             ),
                             const SizedBox(height: ModernTheme.spacingS),
-                            Text(
+                            const Text(
                               'Sign in to your AuraSphere account',
                               style: ModernTheme.bodySmall,
                             ),

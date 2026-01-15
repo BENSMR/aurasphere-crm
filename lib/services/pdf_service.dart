@@ -30,7 +30,7 @@ class PdfService {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text('AURASPHERE CRM', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                pw.Text(labels['invoice']!, style: pw.TextStyle(fontSize: 18)),
+                pw.Text(labels['invoice']!, style: const pw.TextStyle(fontSize: 18)),
               ],
             ),
             pw.SizedBox(height: 20),
@@ -94,7 +94,7 @@ class PdfService {
               child: pw.Center(
                 child: pw.Text(
                   labels['footer']!,
-                  style: pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+                  style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
                 ),
               ),
             ),
@@ -121,7 +121,7 @@ class PdfService {
           'date': 'Date',
           'totalAmount': 'Montant total',
           'dueDate': "Date d'échéance",
-          'footer': "Facture générée par Aurasphere CRM - Logiciel de gestion pour freelances",
+          'footer': 'Facture générée par Aurasphere CRM - Logiciel de gestion pour freelances',
         };
       case 'it':
         return {

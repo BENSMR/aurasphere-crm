@@ -173,15 +173,15 @@ class PricingPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFF10B981), width: 2),
               ),
-              child: Row(
+              child: const Row(
                 children: [
-                  const Icon(Icons.verified, color: Color(0xFF10B981), size: 28),
-                  const SizedBox(width: 12),
+                  Icon(Icons.verified, color: Color(0xFF10B981), size: 28),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           '🎁 Custom Domain Name & Email Included',
                           style: TextStyle(
                             fontSize: 16,
@@ -189,8 +189,8 @@ class PricingPage extends StatelessWidget {
                             color: Color(0xFF059669),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: 4),
+                        Text(
                           'Get a professional business domain and email with every plan—no extra cost!',
                           style: TextStyle(
                             fontSize: 13,
@@ -276,11 +276,11 @@ class PricingPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
                         Icon(Icons.business, color: Colors.orange, size: 32),
-                        const SizedBox(width: 12),
-                        const Text(
+                        SizedBox(width: 12),
+                        Text(
                           'Enterprise',
                           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
@@ -549,9 +549,9 @@ class PricingPage extends StatelessWidget {
                   '✨ What you get:',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
-                Text(
+                const Text(
                   '• Full access to all features',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12),
                 ),
                 const Text(
                   '• No credit card required',

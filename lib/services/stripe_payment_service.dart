@@ -327,7 +327,7 @@ class StripePaymentService {
     required String payload,
     required String signature,
   }) {
-    final secret = String.fromEnvironment('STRIPE_WEBHOOK_SECRET');
+    final secret = const String.fromEnvironment('STRIPE_WEBHOOK_SECRET');
     if (secret.isEmpty) return false;
 
     // Stripe signature verification (simplified)

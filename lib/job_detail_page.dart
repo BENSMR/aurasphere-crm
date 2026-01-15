@@ -78,8 +78,8 @@ class _JobDetailPageState extends State<JobDetailPage> {
               },
             ),
             // Quantity
-            TextField(
-              decoration: const InputDecoration(labelText: 'Quantity'),
+            const TextField(
+              decoration: InputDecoration(labelText: 'Quantity'),
               keyboardType: TextInputType.number,
             ),
           ],

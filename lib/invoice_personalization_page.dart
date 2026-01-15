@@ -421,32 +421,32 @@ class _InvoicePersonalizationPageState extends State<InvoicePersonalizationPage>
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Row(
+                        const Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   'Invoice #',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const Text('INV-001'),
+                                Text('INV-001'),
                               ],
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                const Text(
+                                Text(
                                   'Date',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                const Text('Jan 1, 2025'),
+                                Text('Jan 1, 2025'),
                               ],
                             ),
                           ],

@@ -12,6 +12,8 @@
 /// - Old snapshots
 /// - Orphaned IPs
 /// - Unused reserved instances
+library;
+
 
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -353,7 +355,7 @@ class WasteDetectionService {
           'monthlySavings': monthlyCost,
           'annualSavings': monthlyCost * 12,
           'severity': 'low',
-          'description': 'Snapshot ${ageInDays} days old - likely no longer needed',
+          'description': 'Snapshot $ageInDays days old - likely no longer needed',
           'recommendation': 'Delete old snapshots - implement 30-day retention policy',
         });
 

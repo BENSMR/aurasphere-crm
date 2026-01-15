@@ -35,24 +35,24 @@ class _FeaturesPageState extends State<FeaturesPage> {
       // Default features
       setState(() {
         features = {
-          "pki_mode": false,
-          "client_memory": true,
-          "ai_invoices": true,
-          "financial_clarity": true,
-          "auto_invoicing": false,
-          "business_autopilot": true,
-          "do_nothing_mode": false,
-          "human_explanations": true,
-          "client_health": true,
-          "ocr_expenses": true,
-          "pdf_invoices": true,
-          "teams": true,
-          "usage_limits": true,
-          "dark_mode": true,
-          "auto_tax": true,
-          "data_export": true,
-          "privacy_mode": true,
-          "behavioral_onboarding": true
+          'pki_mode': false,
+          'client_memory': true,
+          'ai_invoices': true,
+          'financial_clarity': true,
+          'auto_invoicing': false,
+          'business_autopilot': true,
+          'do_nothing_mode': false,
+          'human_explanations': true,
+          'client_health': true,
+          'ocr_expenses': true,
+          'pdf_invoices': true,
+          'teams': true,
+          'usage_limits': true,
+          'dark_mode': true,
+          'auto_tax': true,
+          'data_export': true,
+          'privacy_mode': true,
+          'behavioral_onboarding': true
         };
         _loading = false;
       });

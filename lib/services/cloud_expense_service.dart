@@ -3,6 +3,8 @@
 /// Connects to AWS, Azure, GCP to auto-import monthly bills
 /// Tracks cloud costs by project/client
 /// Integrates with waste detection
+library;
+
 
 import 'dart:async';
 

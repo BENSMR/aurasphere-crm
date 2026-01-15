@@ -1,5 +1,5 @@
-import "package:flutter/material.dart";
-import "package:supabase_flutter/supabase_flutter.dart";
+import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -23,7 +23,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sign Up"),
+        title: const Text('Sign Up'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -35,7 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
           children: [
             const SizedBox(height: 40),
             const Text(
-              "Create Account",
+              'Create Account',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 32),
@@ -43,7 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
               controller: _emailController,
               enabled: !_loading,
               decoration: const InputDecoration(
-                labelText: "Email",
+                labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -53,19 +53,19 @@ class _SignUpPageState extends State<SignUpPage> {
               enabled: !_loading,
               obscureText: true,
               decoration: const InputDecoration(
-                labelText: "Password",
+                labelText: 'Password',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _loading ? null : _handleSignUp,
-              child: const Text("Sign Up"),
+              child: const Text('Sign Up'),
             ),
             const SizedBox(height: 16),
             TextButton(
-              onPressed: () => Navigator.pushNamed(context, "/sign-in"),
-              child: const Text("Already have an account? Sign in"),
+              onPressed: () => Navigator.pushNamed(context, '/sign-in'),
+              child: const Text('Already have an account? Sign in'),
             ),
           ],
         ),
@@ -81,12 +81,12 @@ class _SignUpPageState extends State<SignUpPage> {
         password: _passwordController.text,
       );
       if (mounted) {
-        Navigator.pushReplacementNamed(context, "/dashboard");
+        Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {

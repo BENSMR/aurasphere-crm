@@ -2,6 +2,8 @@
 /// CloudGuard FinOps Dashboard
 /// Tracks cloud waste, savings, and partner sales enablement
 /// 28% → <10% waste reduction target
+library;
+
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -416,7 +418,7 @@ class _CloudGuardPageState extends State<CloudGuardPage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _providerController.text.isEmpty ? null : _providerController.text,
+              initialValue: _providerController.text.isEmpty ? null : _providerController.text,
               items: const [
                 DropdownMenuItem(value: 'aws', child: Text('AWS')),
                 DropdownMenuItem(value: 'azure', child: Text('Microsoft Azure')),

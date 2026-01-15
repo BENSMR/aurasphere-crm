@@ -85,18 +85,18 @@ class _SupplierManagementPageState extends State<SupplierManagementPage>
     if (loading) {
       return Scaffold(
         appBar: AppBar(title: const Text('🏢 Supplier Management')),
-        body: Center(
+        body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 20),
-              const Text(
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text(
                 'AI analyzing your suppliers...',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: 8),
+              Text(
                 'First analysis may take 10 seconds',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
@@ -502,24 +502,24 @@ class _SupplierManagementPageState extends State<SupplierManagementPage>
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
+                  const Wrap(
                     spacing: 8,
                     children: [
                       Chip(
-                        label: const Text('✅ Performance Analysis'),
-                        avatar: const Icon(Icons.assessment),
+                        label: Text('✅ Performance Analysis'),
+                        avatar: Icon(Icons.assessment),
                       ),
                       Chip(
-                        label: const Text('📦 Delivery Tracking'),
-                        avatar: const Icon(Icons.local_shipping),
+                        label: Text('📦 Delivery Tracking'),
+                        avatar: Icon(Icons.local_shipping),
                       ),
                       Chip(
-                        label: const Text('💰 Price Optimization'),
-                        avatar: const Icon(Icons.trending_down),
+                        label: Text('💰 Price Optimization'),
+                        avatar: Icon(Icons.trending_down),
                       ),
                       Chip(
-                        label: const Text('🔔 Reorder Alerts'),
-                        avatar: const Icon(Icons.notifications_active),
+                        label: Text('🔔 Reorder Alerts'),
+                        avatar: Icon(Icons.notifications_active),
                       ),
                     ],
                   ),

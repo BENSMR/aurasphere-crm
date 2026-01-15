@@ -259,12 +259,12 @@ class _ModernButtonState extends State<ModernButton>
                 const SizedBox(width: ModernTheme.spacingS),
               ],
               if (widget.loading)
-                SizedBox(
+                const SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
               else

@@ -46,10 +46,10 @@ class RealtimeService {
       
       _logger.i('✅ Job real-time subscription active');
       
-      return Stream.empty();
+      return const Stream.empty();
     } catch (e) {
       _logger.e('❌ Error subscribing to jobs: $e');
-      return Stream.empty();
+      return const Stream.empty();
     }
   }
 
@@ -79,10 +79,10 @@ class RealtimeService {
       
       _logger.i('✅ Invoice real-time subscription active');
       
-      return Stream.empty();
+      return const Stream.empty();
     } catch (e) {
       _logger.e('❌ Error subscribing to invoices: $e');
-      return Stream.empty();
+      return const Stream.empty();
     }
   }
 
@@ -118,10 +118,10 @@ class RealtimeService {
       
       _logger.i('✅ Team activity subscription active');
       
-      return Stream.empty();
+      return const Stream.empty();
     } catch (e) {
       _logger.e('❌ Error subscribing to team activity: $e');
-      return Stream.empty();
+      return const Stream.empty();
     }
   }
 

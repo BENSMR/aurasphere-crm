@@ -84,9 +84,9 @@ class _LandingPageAnimatedState extends State<LandingPageAnimated> {
             ],
           ),
           if (!isMobile)
-            Row(
+            const Row(
               children: [
-                const SizedBox(width: 40),
+                SizedBox(width: 40),
               ],
             ),
           ElevatedButton(
@@ -722,7 +722,7 @@ class _LandingPageAnimatedState extends State<LandingPageAnimated> {
             Row(
               children: List.generate(
                 5,
-                (i) => Icon(Icons.star, color: Colors.amber, size: 14),
+                (i) => const Icon(Icons.star, color: Colors.amber, size: 14),
               ),
             ),
             const SizedBox(height: 12),

@@ -153,13 +153,13 @@ class _WhatsAppNumbersPageState extends State<WhatsAppNumbersPage> {
                 final numbers = snapshot.data ?? [];
 
                 if (numbers.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.phone_disabled, size: 48, color: Colors.grey),
-                        const SizedBox(height: 12),
-                        const Text('No WhatsApp numbers added yet'),
+                        Icon(Icons.phone_disabled, size: 48, color: Colors.grey),
+                        SizedBox(height: 12),
+                        Text('No WhatsApp numbers added yet'),
                       ],
                     ),
                   );

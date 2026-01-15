@@ -1,6 +1,8 @@
 // lib/partner_portal_page.dart
 /// Partner Sales Enablement Portal
 /// Certification, commissions, and sales resources for resellers/affiliates
+library;
+
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
