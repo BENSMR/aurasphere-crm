@@ -55,20 +55,41 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
       
-      // Real Supabase Authentication
-      _logger.i('🔐 Authenticating with Supabase: $email');
+      // Real Supabase Authentication via Edge Function (keeps secrets server-side)
+      _logger.i('🔐 Authenticating via Edge Function: $email');
       print('🔐 Sign in attempt: $email');
-      
+
       final supabase = Supabase.instance.client;
-      
-      final response = await supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
+
+      // Call Edge Function instead of direct Supabase auth
+      final response = await supabase.functions.invoke(
+        'authfix',
+        method: HttpMethod.post,
+        body: {
+          'endpoint': '/signin',
+          'email': email,
+          'password': password,
+        },
       );
+
+      print('✅ Edge Function response: $response');
+
+      if (response == null) {
+        throw Exception('Auth function returned null');
+      }
+
+      // Parse response
+      final authData = response as Map<String, dynamic>;
       
-      _logger.i('✅ Authentication successful: ${response.user?.id}');
-      print('✅ Signed in: ${response.user?.id}');
-      
+      if (authData['error'] != null) {
+        throw AuthException(
+          authData['error'].toString(),
+          statusCode: '401',
+        );
+      }
+
+      _logger.i('✅ Authentication successful');
+
       if (mounted) {
         // Wait a moment for Supabase to update session
         await Future.delayed(const Duration(milliseconds: 500));
@@ -80,17 +101,17 @@ class _SignInPageState extends State<SignInPage> {
       final errorMsg = '${e.message} (Status: ${e.statusCode})';
       _logger.e('❌ Auth error: $errorMsg');
       print('❌ Auth error: $errorMsg');
-      
+
       // Provide specific error guidance
       String userMessage = e.message;
       if (e.statusCode == '401' || e.message.contains('401')) {
-        userMessage = '401: Invalid email/password or account not verified. Check email verification.';
+        userMessage = 'Invalid email/password. Please check your credentials.';
       } else if (e.message.contains('invalid login credentials')) {
         userMessage = 'Invalid email or password. Please check and try again.';
       } else if (e.message.contains('not found')) {
         userMessage = 'Account not found. Try signing up first.';
       }
-      
+
       if (mounted) {
         setState(() => _errorMessage = userMessage);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +122,7 @@ class _SignInPageState extends State<SignInPage> {
       _logger.e('❌ Unexpected error: $e');
       print('❌ Error details: $e');
       if (mounted) {
-        setState(() => _errorMessage = 'Connection error: Check your internet and Supabase configuration');
+        setState(() => _errorMessage = 'Connection error: ${e.toString()}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('❌ Error: $e'))
         );
