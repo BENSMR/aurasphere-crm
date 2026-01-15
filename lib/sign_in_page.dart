@@ -57,13 +57,17 @@ class _SignInPageState extends State<SignInPage> {
       
       // Real Supabase Authentication
       _logger.i('🔐 Authenticating with Supabase: $email');
+      print('🔐 Sign in attempt: $email');
       
-      final response = await Supabase.instance.client.auth.signInWithPassword(
+      final supabase = Supabase.instance.client;
+      
+      final response = await supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
       
       _logger.i('✅ Authentication successful: ${response.user?.id}');
+      print('✅ Signed in: ${response.user?.id}');
       
       if (mounted) {
         // Wait a moment for Supabase to update session
@@ -73,19 +77,33 @@ class _SignInPageState extends State<SignInPage> {
         }
       }
     } on AuthException catch (e) {
-      _logger.e('❌ Auth error: ${e.message}');
+      final errorMsg = '${e.message} (Status: ${e.statusCode})';
+      _logger.e('❌ Auth error: $errorMsg');
+      print('❌ Auth error: $errorMsg');
+      
+      // Provide specific error guidance
+      String userMessage = e.message;
+      if (e.statusCode == '401' || e.message.contains('401')) {
+        userMessage = '401: Invalid email/password or account not verified. Check email verification.';
+      } else if (e.message.contains('invalid login credentials')) {
+        userMessage = 'Invalid email or password. Please check and try again.';
+      } else if (e.message.contains('not found')) {
+        userMessage = 'Account not found. Try signing up first.';
+      }
+      
       if (mounted) {
-        setState(() => _errorMessage = e.message);
+        setState(() => _errorMessage = userMessage);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign in failed: ${e.message}'))
+          SnackBar(content: Text('❌ $userMessage'))
         );
       }
     } catch (e) {
       _logger.e('❌ Unexpected error: $e');
+      print('❌ Error details: $e');
       if (mounted) {
-        setState(() => _errorMessage = e.toString());
+        setState(() => _errorMessage = 'Connection error: Check your internet and Supabase configuration');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'))
+          SnackBar(content: Text('❌ Error: $e'))
         );
       }
     } finally {
