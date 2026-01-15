@@ -21,6 +21,8 @@ class _SignInPageState extends State<SignInPage> {
   bool _loading = false;
   bool _showPassword = false;
   String? _errorMessage;
+  
+  final supabase = Supabase.instance.client;
 
   Future<void> _signIn() async {
     if (_loading) return;
@@ -55,20 +57,22 @@ class _SignInPageState extends State<SignInPage> {
         return;
       }
       
-      // DEMO MODE - Simple local authentication for testing
-      // In production, replace with: await supabase.functions.invoke('authfix', ...)
-      
-      print('🔐 Demo: Sign in attempt: $email');
+      // REAL SUPABASE AUTHENTICATION
+      print('🔐 Signing in with Supabase: $email');
 
-      // Very basic validation - in production use real auth
-      if (email == 'test@example.com' && password == 'test123') {
-        _logger.i('✅ Demo: Authentication successful');
-        print('✅ Demo login successful');
+      try {
+        final response = await supabase.auth.signInWithPassword(
+          email: email.trim(),
+          password: password,
+        );
+
+        _logger.i('✅ Sign in successful');
+        print('✅ User signed in: ${response.user?.id}');
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Demo: Signed in successfully!'),
+              content: Text('✅ Signed in successfully!'),
               backgroundColor: Colors.green,
             ),
           );
@@ -78,8 +82,9 @@ class _SignInPageState extends State<SignInPage> {
             Navigator.pushReplacementNamed(context, '/dashboard');
           }
         }
-      } else {
-        throw Exception('Demo: Invalid credentials. Try test@example.com / test123');
+      } on AuthException catch (e) {
+        _logger.e('❌ Auth error: ${e.message}');
+        throw Exception('Sign in failed: ${e.message}');
       }
     } catch (e) {
       _logger.e('❌ Error: $e');
