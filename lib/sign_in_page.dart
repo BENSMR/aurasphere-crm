@@ -83,8 +83,13 @@ class _SignInPageState extends State<SignInPage> {
           }
         }
       } on AuthException catch (e) {
-        _logger.e('❌ Auth error: ${e.message}');
+        _logger.e('❌ Auth exception: ${e.message} (status: ${e.statusCode})');
+        print('❌ Auth error details: message=${e.message}, statusCode=${e.statusCode}');
         throw Exception('Sign in failed: ${e.message}');
+      } catch (e) {
+        _logger.e('❌ Unexpected error: $e');
+        print('❌ Full error: $e');
+        rethrow;
       }
     } catch (e) {
       _logger.e('❌ Error: $e');
