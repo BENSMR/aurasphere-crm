@@ -8,7 +8,7 @@
 class EnvLoader {
   static final Map<String, String> _env = {
     // ✅ PUBLIC: Supabase URL (safe to expose, contains no secrets)
-    'SUPABASE_URL': 'https://fppmvibvpxrkwmymszhd.supabase.co',
+    'SUPABASE_URL': 'https://fppmuibvpxrkwmymszhd.supabase.co',
     
     // ✅ SEMI-PUBLIC: Supabase Anon Key (limited scope via RLS policies)
     'SUPABASE_ANON_KEY': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcG11aWJ2cHhya3dteW1zemhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjU1MzUsImV4cCI6MjA4MTcwMTUzNX0.Qm99GcdIdl9iBywdsjmP8Gh5SMLk3UYulwytxXTnzxA',
