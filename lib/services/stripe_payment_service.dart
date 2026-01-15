@@ -1,7 +1,14 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:logger/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// StripePaymentService - Stripe payment processing
+final _logger = Logger();
+
+/// StripePaymentService - Stripe payment processing via Edge Function proxy
+/// 
+/// ✅ SECURE: API keys stored in Supabase Secrets only
+/// ✅ NO keys exposed on frontend
+/// ✅ All calls go through Edge Function: supabase/functions/stripe-proxy/
 /// 
 /// Supports:
 /// - Creating subscriptions
@@ -10,9 +17,8 @@ import 'dart:convert';
 /// - Subscription updates/cancellations
 
 class StripePaymentService {
-  static const String baseUrl = 'https://api.stripe.com/v1';
-  static const String secretKey = String.fromEnvironment('STRIPE_SECRET_KEY');
-  static const String publishableKey = String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
+  static final StripePaymentService _instance = StripePaymentService._internal();
+  final supabase = Supabase.instance.client;
 
   // PRODUCT & PRICE IDs (Set these in Stripe Dashboard)
   // Get from: https://dashboard.stripe.com/products
@@ -21,8 +27,12 @@ class StripePaymentService {
     'team': 'price_1234567890bcdefg',
     'workshop': 'price_1234567890cdefgh',
   };
-  
-  // CONFIGURATION HELPER - warns if price IDs are still placeholders
+
+  StripePaymentService._internal();
+
+  factory StripePaymentService() => _instance;
+
+  /// Validate price IDs are configured
   static void validatePriceIds() {
     final missingIds = <String>[];
     priceIds.forEach((plan, id) {
@@ -31,44 +41,44 @@ class StripePaymentService {
       }
     });
     if (missingIds.isNotEmpty) {
-      print('⚠️  WARNING: Missing Stripe price IDs: $missingIds');
-      print('   Get these from: https://dashboard.stripe.com/products');
+      _logger.w('⚠️  WARNING: Missing Stripe price IDs: $missingIds');
+      _logger.i('   Get these from: https://dashboard.stripe.com/products');
     }
   }
 
-  // CREATE CUSTOMER
+  /// Create a Stripe customer via backend proxy
   static Future<String?> createCustomer({
     required String email,
     required String name,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/customers'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      _logger.i('💳 Creating Stripe customer: $email');
+      
+      final response = await Supabase.instance.client.functions.invoke(
+        'stripe-proxy',
         body: {
+          'action': 'create_customer',
           'email': email,
           'name': name,
-          'metadata[user_type]': 'crm_user',
+          'metadata': {'user_type': 'crm_user'},
         },
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['id']; // Return customer ID
+      if (response['success'] == true) {
+        final customerId = response['customer_id'] as String;
+        _logger.i('✅ Stripe customer created: $customerId');
+        return customerId;
       } else {
-        print('❌ Create customer failed: ${response.body}');
+        _logger.e('❌ Create customer failed: ${response['error']}');
         return null;
       }
     } catch (e) {
-      print('❌ Error creating customer: $e');
+      _logger.e('❌ Error creating customer: $e');
       return null;
     }
   }
 
-  // CREATE SUBSCRIPTION
+  /// Create a Stripe subscription via backend proxy
   static Future<Map<String, dynamic>?> createSubscription({
     required String customerId,
     required String planId, // 'solo', 'team', or 'workshop'
@@ -76,262 +86,116 @@ class StripePaymentService {
     try {
       final priceId = priceIds[planId];
       if (priceId == null) {
-        print('❌ Invalid plan ID: $planId');
+        _logger.e('❌ Invalid plan ID: $planId');
         return null;
       }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/subscriptions'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      _logger.i('💳 Creating Stripe subscription: $planId');
+
+      final response = await Supabase.instance.client.functions.invoke(
+        'stripe-proxy',
         body: {
-          'customer': customerId,
-          'items[0][price]': priceId,
+          'action': 'create_subscription',
+          'customer_id': customerId,
+          'price_id': priceId,
           'payment_behavior': 'default_incomplete',
-          'payment_settings[save_default_payment_method]': 'on_subscription',
-          'expand[]': 'latest_invoice.payment_intent',
+          'payment_settings': {'save_default_payment_method': 'on_subscription'},
         },
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+      if (response['success'] == true) {
+        _logger.i('✅ Stripe subscription created');
+        return response as Map<String, dynamic>;
       } else {
-        print('❌ Create subscription failed: ${response.body}');
+        _logger.e('❌ Create subscription failed: ${response['error']}');
         return null;
       }
     } catch (e) {
-      print('❌ Error creating subscription: $e');
+      _logger.e('❌ Error creating subscription: $e');
       return null;
     }
   }
 
-  // GET SUBSCRIPTION
-  static Future<Map<String, dynamic>?> getSubscription(String subscriptionId) async {
+  /// Cancel a Stripe subscription via backend proxy
+  static Future<bool> cancelSubscription({required String subscriptionId}) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/subscriptions/$subscriptionId'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
+      _logger.i('💳 Cancelling Stripe subscription: $subscriptionId');
+
+      final response = await Supabase.instance.client.functions.invoke(
+        'stripe-proxy',
+        body: {
+          'action': 'cancel_subscription',
+          'subscription_id': subscriptionId,
         },
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        print('❌ Get subscription failed: ${response.body}');
-        return null;
-      }
-    } catch (e) {
-      print('❌ Error getting subscription: $e');
-      return null;
-    }
-  }
-
-  // CANCEL SUBSCRIPTION
-  static Future<bool> cancelSubscription(
-    String subscriptionId, {
-    String? reason,
-  }) async {
-    try {
-      final body = {
-        'cancellation_details[reason]': reason ?? 'cancellation_requested',
-      };
-
-      final response = await http.delete(
-        Uri.parse('$baseUrl/subscriptions/$subscriptionId'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        print('✅ Subscription cancelled: $subscriptionId');
+      if (response['success'] == true) {
+        _logger.i('✅ Subscription cancelled');
         return true;
       } else {
-        print('❌ Cancel subscription failed: ${response.body}');
+        _logger.e('❌ Cancel failed: ${response['error']}');
         return false;
       }
     } catch (e) {
-      print('❌ Error cancelling subscription: $e');
+      _logger.e('❌ Error cancelling subscription: $e');
       return false;
     }
   }
 
-  // UPDATE SUBSCRIPTION
-  static Future<bool> updateSubscriptionPlan({
+  /// Update a Stripe subscription via backend proxy
+  static Future<bool> updateSubscription({
     required String subscriptionId,
-    required String newPlanId,
+    required String newPriceId,
   }) async {
     try {
-      final priceId = priceIds[newPlanId];
-      if (priceId == null) return false;
+      _logger.i('💳 Updating Stripe subscription: $subscriptionId');
 
-      // First get current subscription
-      final sub = await getSubscription(subscriptionId);
-      if (sub == null) return false;
-
-      final currentItemId = sub['items']['data'][0]['id'];
-
-      // Update item
-      final response = await http.post(
-        Uri.parse('$baseUrl/subscription_items/$currentItemId'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      final response = await Supabase.instance.client.functions.invoke(
+        'stripe-proxy',
         body: {
-          'price': priceId,
+          'action': 'update_subscription',
+          'subscription_id': subscriptionId,
+          'new_price_id': newPriceId,
           'proration_behavior': 'create_prorations',
         },
       );
 
-      if (response.statusCode == 200) {
-        print('✅ Subscription updated to $newPlanId');
+      if (response['success'] == true) {
+        _logger.i('✅ Subscription updated');
         return true;
       } else {
-        print('❌ Update subscription failed: ${response.body}');
+        _logger.e('❌ Update failed: ${response['error']}');
         return false;
       }
     } catch (e) {
-      print('❌ Error updating subscription: $e');
+      _logger.e('❌ Error updating subscription: $e');
       return false;
     }
   }
 
-  // CREATE PAYMENT INTENT (for checkout)
-  static Future<Map<String, dynamic>?> createPaymentIntent({
-    required double amount,
-    required String currency,
-    required String customerId,
-  }) async {
+  /// Get subscription details via backend proxy
+  static Future<Map<String, dynamic>?> getSubscription({required String subscriptionId}) async {
     try {
-      final amountCents = (amount * 100).toInt();
+      _logger.i('💳 Fetching Stripe subscription: $subscriptionId');
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/payment_intents'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      final response = await Supabase.instance.client.functions.invoke(
+        'stripe-proxy',
         body: {
-          'amount': amountCents.toString(),
-          'currency': currency,
-          'customer': customerId,
-          'payment_method_types[]': 'card',
+          'action': 'get_subscription',
+          'subscription_id': subscriptionId,
         },
       );
 
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+      if (response['success'] == true) {
+        _logger.i('✅ Subscription retrieved');
+        return response as Map<String, dynamic>;
       } else {
-        print('❌ Create payment intent failed: ${response.body}');
+        _logger.e('❌ Fetch failed: ${response['error']}');
         return null;
       }
     } catch (e) {
-      print('❌ Error creating payment intent: $e');
+      _logger.e('❌ Error fetching subscription: $e');
       return null;
     }
-  }
-
-  // GET PAYMENT METHOD
-  static Future<Map<String, dynamic>?> getPaymentMethod(String paymentMethodId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/payment_methods/$paymentMethodId'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('❌ Error getting payment method: $e');
-      return null;
-    }
-  }
-
-  // ATTACH PAYMENT METHOD TO CUSTOMER
-  static Future<bool> attachPaymentMethod({
-    required String paymentMethodId,
-    required String customerId,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/payment_methods/$paymentMethodId/attach'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'customer': customerId,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('❌ Attach payment method failed: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('❌ Error attaching payment method: $e');
-      return false;
-    }
-  }
-
-  // REFUND
-  static Future<bool> refund({
-    required String chargeId,
-    double? amount,
-    String? reason,
-  }) async {
-    try {
-      final body = {
-        'charge': chargeId,
-        if (amount != null) 'amount': ((amount * 100).toInt()).toString(),
-        if (reason != null) 'reason': reason,
-      };
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/refunds'),
-        headers: {
-          'Authorization': 'Bearer $secretKey',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body,
-      );
-
-      if (response.statusCode == 200) {
-        print('✅ Refund processed');
-        return true;
-      } else {
-        print('❌ Refund failed: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('❌ Error processing refund: $e');
-      return false;
-    }
-  }
-
-  // VERIFY WEBHOOK SIGNATURE
-  static bool verifyWebhookSignature({
-    required String payload,
-    required String signature,
-  }) {
-    final secret = const String.fromEnvironment('STRIPE_WEBHOOK_SECRET');
-    if (secret.isEmpty) return false;
-
-    // Stripe signature verification (simplified)
-    // In production, use proper signature verification library
-    return true;
   }
 }

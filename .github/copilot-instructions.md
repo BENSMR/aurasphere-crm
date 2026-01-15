@@ -1,6 +1,6 @@
 # AuraSphere CRM - AI Coding Agent Instructions
 
-**Last Updated**: January 14, 2026 | Flutter 3.9.2 | Supabase 2.12.0
+**Last Updated**: January 15, 2026 | Flutter 3.9.2 | Supabase 2.12.0
 
 ## 🎯 Quick Start for AI Agents
 
@@ -108,6 +108,78 @@ This is a **Flutter + Supabase SaaS CRM** for tradespeople with 30+ feature page
 3. **Subscription Lifecycle**: Trial → Paddle/Stripe payment → org plan update → feature access control
 4. **Automation**: Services run on schedule (backend) or via user triggers; NO cron in frontend
 
+## Page Lifecycle & State Management
+
+### Page Structure Pattern
+Every page follows this lifecycle structure (see `invoice_list_page.dart`, `dashboard_page.dart`):
+
+```dart
+class MyPage extends StatefulWidget {
+  const MyPage({super.key});
+  
+  @override
+  State<MyPage> createState() => _MyPageState();
+}
+
+class _MyPageState extends State<MyPage> {
+  final supabase = Supabase.instance.client;
+  bool loading = true;
+  List<Map<String, dynamic>> items = [];  // Local state only
+  
+  @override
+  void initState() {
+    super.initState();
+    _checkAuth();       // Check auth FIRST
+    _loadData();        // Then load data
+    _setupRealtimeListeners();  // Then setup real-time (optional)
+  }
+  
+  @override
+  void dispose() {
+    // Clean up real-time listeners, timers, controllers
+    super.dispose();
+  }
+  
+  Future<void> _checkAuth() async {
+    if (Supabase.instance.client.auth.currentUser == null) {
+      if (mounted) Navigator.pushReplacementNamed(context, '/');
+    }
+  }
+  
+  Future<void> _loadData() async {
+    setState(() => loading = true);
+    try {
+      items = await supabase.from('table').select().eq('org_id', orgId);
+    } catch (e) {
+      print('❌ Error loading: $e');
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+  
+  void _setupRealtimeListeners() {
+    // Optional: Use RealtimeService for live updates
+    RealtimeService().listenToJobs(orgId, (data, action) {
+      if (mounted) setState(() => items = [...items]);
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    if (Supabase.instance.client.auth.currentUser == null) {
+      return Scaffold(body: Center(child: Text('Unauthorized')));
+    }
+    return Scaffold(/* UI here */);
+  }
+}
+```
+
+**Key Rules**:
+1. `initState` order: Auth → Data → Real-time
+2. Always `if (mounted)` before setState in try/catch/finally
+3. Local state only (no global state managers)
+4. Clean up listeners in `dispose()`
+
 ## Essential Patterns
 
 ### Auth Guard Pattern (Every Protected Page)
@@ -133,9 +205,185 @@ Widget build(BuildContext context) {
   // Page content
 }
 ```
-**Why both checks**: Race condition on hot reload. `initState` redirects; `build` guards state updates.
 
-**Option 2: AuthGate Pattern (For root navigation)**
+**Option 1b: Using WidgetsBinding (seen in job_list_page, client_list_page)**:
+```dart
+@override
+void initState() {
+  super.initState();
+  if (supabase.auth.currentUser == null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacementNamed(context, '/');
+    });
+  } else {
+    _loadData();  // Only load if authenticated
+  }
+}
+```
+Both patterns work - use whichever fits your page structure.
+
+### Real-Time Data Updates Pattern
+Use `realtime_service.dart` to listen for database changes and auto-refresh pages. **Real-time is optional** - app still works without it:
+
+```dart
+void _setupRealtimeListeners() {
+  try {
+    print('📡 Setting up real-time listeners');
+    
+    // Listen for invoice changes
+    RealtimeService().listenToInvoices(orgId, (data, action) {
+      print('✅ Invoice ${action}: ${data['id']}');
+      if (mounted) {
+        setState(() {
+          // Update local state with new data
+          invoices = [...invoices]; // or refetch
+        });
+      }
+    });
+    
+    // Listen for team activity (presence)
+    RealtimeService().listenToTeamActivity(orgId, (presence) {
+      print('🟢 Team member online');
+    });
+    
+  } catch (e) {
+    print('⚠️ Real-time failed (non-critical): $e');
+    // Real-time is optional; fail gracefully
+  }
+}
+
+@override
+void dispose() {
+  // Clean up all real-time subscriptions
+  RealtimeService().unsubscribeAll();
+  super.dispose();
+}
+```
+
+**Real-Time by Page Type** (choose which pages need real-time):
+- **Job/Invoice List Pages**: `RealtimeService().listenToJobs()` / `.listenToInvoices()` - auto-refresh when team member updates
+- **Team Activity Page**: `RealtimeService().listenToTeamActivity()` - show who's online
+- **Dashboard**: Skip real-time (too expensive) - use manual refresh button
+- **Detail Pages** (job_detail_page): Listen to specific record changes only
+
+**Rules**:
+- Real-time is **optional** - app still works without it
+- Always wrap in try/catch - failures should not crash pages
+- Update local state in callback via setState if mounted
+- Unsubscribe in `dispose()` to prevent memory leaks
+- Listen only to tables you're displaying
+
+### Theme & Styling with ModernTheme
+All design uses `ModernTheme` from `lib/theme/modern_theme.dart`:
+
+```dart
+import 'package:flutter/material.dart';
+import '../theme/modern_theme.dart';
+
+// Colors
+Color primaryBlue = ModernTheme.electricBlue;  // #007BFF
+Color textDark = ModernTheme.textDark;         // #1E293B
+List<BoxShadow> shadow = ModernTheme.cardShadow;
+
+// Typography
+TextStyle heading = ModernTheme.headline3;
+TextStyle body = ModernTheme.bodyLarge;
+
+// Build UI
+Container(
+  decoration: BoxDecoration(
+    color: ModernTheme.cardWhite,
+    boxShadow: ModernTheme.cardShadow,
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Text('Hello', style: ModernTheme.headline4),
+)
+```
+
+**Design Tokens**:
+- Primary color: `#007BFF` (Electric Blue) - ENFORCED across app
+- Secondary: `#BFFF00` (Green-Yellow for accents)
+- Fonts: Manrope (headline), default system (body)
+- Shadows: Card, Glassmorphism, Hover variants
+- Gradients: Primary, Accent, Neutral
+
+### Feature Flags in UI
+Always check feature personalization before rendering feature-heavy sections:
+
+```dart
+// Get user's feature preferences for current device
+final features = await FeaturePersonalizationService()
+    .getPersonalizedFeatures(userId: userId, deviceType: 'mobile');
+
+// Check if feature is enabled
+final hasAIAgents = features.any((f) => f['id'] == 'ai_agents');
+final hasMarketing = features.any((f) => f['id'] == 'marketing');
+final hasDispatch = features.any((f) => f['id'] == 'dispatch');
+
+// Render conditionally
+@override
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      if (hasAIAgents) AiAgentsWidget(),
+      if (hasMarketing) MarketingWidget(),
+      if (hasDispatch) DispatchWidget(),
+    ],
+  );
+}
+```
+
+**Feature Limits by Device Type & Subscription**:
+- **Mobile**: Max 6 features per device
+  - Solo: 1 device
+  - Team: 3 devices  
+  - Workshop: 5 devices
+- **Tablet**: Max 8 features per device
+  - Solo: 1 device
+  - Team: 2 devices
+  - Workshop: 3 devices
+
+**Owner Control Layer** (See `FeaturePersonalizationService` for full implementation):
+```dart
+// Owner: Force enable all features on a specific team member's device
+final result = await FeaturePersonalizationService()
+    .forceEnableAllFeaturesOnDevice(
+      orgId: orgId,
+      ownerUserId: currentUserId,
+      targetDeviceId: deviceId,
+      targetUserId: teamMemberId,
+    );
+
+// Owner: Disable specific features on team member device
+await FeaturePersonalizationService()
+    .disableFeaturesOnDevice(
+      orgId: orgId,
+      ownerUserId: currentUserId,
+      targetDeviceId: deviceId,
+      targetUserId: teamMemberId,
+      featuresToDisable: ['ai_agents', 'marketing'],
+    );
+
+// Owner: Lock features org-wide (compliance, security policies)
+await FeaturePersonalizationService()
+    .lockFeaturesOrgWide(
+      orgId: orgId,
+      ownerUserId: currentUserId,
+      lockedFeatureIds: ['digital_signature', 'whitelabel'],
+      reason: 'Enterprise security requirement',
+    );
+
+// Owner: View audit trail of all feature changes
+final auditLog = await FeaturePersonalizationService()
+    .getFeatureAuditLog(orgId: orgId, ownerUserId: currentUserId);
+```
+
+**Rules**:
+- Feature checks happen BEFORE rendering - prevents UI component load errors
+- Device limits enforced by `FeaturePersonalizationService` - users can't bypass
+- Owner controls logged in `feature_audit_log` table for compliance
+
+
 Use `AuthGate` widget in main.dart to check session in background without blocking UI:
 ```dart
 class _AuthGateState extends State<AuthGate> {
@@ -158,23 +406,65 @@ class _AuthGateState extends State<AuthGate> {
 ```
 **Why this pattern**: Non-blocking, fast initial render, graceful fallback if auth check fails.
 
-### Supabase Query Pattern
+### Supabase Query Pattern (RLS Enforced)
 ```dart
+// ✅ CORRECT: Filter by org_id on every query (RLS enforced)
 final org = await supabase
     .from('organizations')
     .select('id, plan, owner_id')  // Only fetch needed fields
-    .eq('owner_id', userId)
-    .single();  // Use .single() for 1 result, .maybeSingle() for 0-1
-
-// Batch complex queries with joins
-final data = await supabase
-    .from('invoices')
-    .select('*, clients!inner(id, email)')  // Join with RLS check
     .eq('org_id', orgId)
+    .single();
+
+// ✅ CORRECT: Job query with filters
+final activeJobs = await supabase
+    .from('jobs')
+    .select('*, clients(name)')
+    .eq('org_id', orgId)  // ALWAYS include org_id FIRST
+    .eq('status', 'active')
+    .order('start_date');
+
+// ✅ CORRECT: Client list with pagination
+final clients = await supabase
+    .from('clients')
+    .select('id, name, email, phone')
+    .eq('org_id', orgId)  // ALWAYS include org_id FIRST
+    .range(0, 49);
+
+// ✅ CORRECT: Overdue invoices (complex example)
+final overdue = await supabase
+    .from('invoices')
+    .select('id, number, amount, clients(name, email)')
+    .eq('org_id', orgId)  // ALWAYS include org_id FIRST
     .eq('status', 'sent')
-    .lt('due_date', overdueDate);
+    .lt('due_date', DateTime.now().toIso8601String())
+    .isFilter('reminder_sent_at', null);
+
+// ❌ WRONG: Missing org_id violates RLS
+final badQuery = await supabase
+    .from('invoices')
+    .select()
+    .eq('status', 'sent');  // RLS error: missing org_id = SILENT FAILURE
+
+// ❌ WRONG: Attempting to access other org's data (RLS blocks this)
+final wrongOrg = await supabase
+    .from('invoices')
+    .select()
+    .eq('org_id', otherOrgId);  // RLS policy prevents cross-org access
 ```
-**Rules**: Never silently catch exceptions; use `.single()` + `.maybeSingle()`; always filter by `org_id`.
+**Rules**: 
+- Always filter by `org_id` first
+- Use `.single()` for exactly 1 result, `.maybeSingle()` for 0-1
+- Never silently catch - log and optionally rethrow
+- Missing `org_id` = security breach
+
+**RLS Behavior**:
+- Queries without `org_id` filter return **empty results** (silent failure)
+- Attempting to insert/update without `org_id` causes **database error** at constraint layer
+- RLS policies automatically filter based on authenticated user's `org_id` in auth claims
+- **CRITICAL AUDIT**: Before deploying, grep for unfiltered queries:
+  ```bash
+  grep -r "from('invoices')\|from('jobs')\|from('clients')" lib/ | grep -v "eq('org_id'" | head -20
+  ```
 
 ### Async State Management
 ```dart
@@ -187,10 +477,13 @@ class _PageState extends State<Page> {
     try {
       items = await _fetchData();
     } catch (e) {
-      print('❌ Error: $e');
+      print('❌ Error loading data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
+            .showSnackBar(SnackBar(
+              content: Text('Failed to load: ${e.toString().split('\n').first}'),
+              duration: const Duration(seconds: 4),
+            ));
       }
     } finally {
       if (mounted) setState(() => loading = false);  // Critical: check mounted
@@ -198,7 +491,81 @@ class _PageState extends State<Page> {
   }
 }
 ```
-**Key**: Always `if (mounted)` before setState in finally/catch to prevent "setState after dispose" crashes.
+
+**Error Handling Pattern**:
+```dart
+// ✅ CORRECT - User-friendly error messages
+ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  content: Text('Invoice added successfully'),
+  backgroundColor: Colors.green,
+  duration: Duration(seconds: 2),
+));
+
+// ✅ CORRECT - Clear error context
+ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  content: Text('Failed to update invoice: Invalid amount'),
+  backgroundColor: Colors.red,
+));
+
+// ❌ WRONG - Exposing raw exception to user
+ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  content: Text(e.toString()),  // User sees SQL errors, stack traces, etc.
+));
+```
+
+**Key Rules**:
+- Always `if (mounted)` before setState in finally/catch to prevent crashes
+- Always provide user-friendly error messages (avoid raw exception text)
+- Use emoji prefixes for console logging: `print('❌ Failed: $e')`
+- Set SnackBar duration to 4+ seconds for network errors
+
+### Multi-Tenancy & Row-Level Security (RLS)
+**Every Supabase query MUST filter by `org_id`** - This is enforced by RLS policies at the database layer:
+
+```dart
+// ✅ CORRECT PATTERNS:
+
+// Pattern 1: Single record query
+final invoice = await supabase
+    .from('invoices')
+    .select()
+    .eq('org_id', currentOrgId)  // Filter first
+    .eq('id', invoiceId)
+    .single();
+
+// Pattern 2: List with multiple filters
+final overdue = await supabase
+    .from('invoices')
+    .select()
+    .eq('org_id', currentOrgId)  // Filter first
+    .eq('status', 'sent')
+    .lt('due_date', DateTime.now().toIso8601String());
+
+// Pattern 3: Joins - RLS filters automatically propagate
+final data = await supabase
+    .from('invoices')
+    .select('*, clients!inner(id, email), jobs(id)')
+    .eq('org_id', currentOrgId)  // Filters invoices table
+    .eq('status', 'overdue');
+
+// ❌ SECURITY BREACH - Missing org_id:
+final badQuery = await supabase
+    .from('invoices')
+    .select()
+    .eq('id', invoiceId);  // RLS violation - may return empty or fail silently
+
+// ❌ WRONG - Will not return data from other org even if access granted
+final wrongOrg = await supabase
+    .from('invoices')
+    .select()
+    .eq('org_id', otherOrgId);  // Can't access other org's data (RLS enforced)
+```
+
+**RLS Behavior**:
+- Queries without `org_id` filter return **empty results** (silent failure)
+- Attempting to insert/update without `org_id` causes **error** at database layer
+- RLS policies automatically filter based on authenticated user's org
+- **AUDIT**: Before deploying, grep all Supabase queries for missing `org_id`
 
 ### Logging Convention
 **Pages**: Use `print()` with emoji prefixes for UI debugging:
@@ -216,6 +583,58 @@ final _logger = Logger();
 _logger.i('🔄 Processing...');  // Info
 _logger.e('Failed: $error');     // Error
 _logger.w('Warning: $msg');      // Warning
+```
+
+## Common Page Patterns (Quick Reference)
+
+**Loading/Empty State Pattern**:
+```dart
+@override
+Widget build(BuildContext context) {
+  if (loading) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Loading')),
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+  
+  if (items.isEmpty) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Items')),
+      body: const Center(child: Text('No items yet')),
+    );
+  }
+  
+  // Success state with list
+  return Scaffold(
+    appBar: AppBar(title: const Text('Items')),
+    body: ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, i) => ListTile(title: Text(items[i]['name'])),
+    ),
+  );
+}
+```
+
+**Responsive Layout Pattern**:
+```dart
+final isMobile = MediaQuery.of(context).size.width < 600;
+final isTablet = MediaQuery.of(context).size.width >= 600 && MediaQuery.of(context).size.width < 1200;
+final isDesktop = MediaQuery.of(context).size.width >= 1200;
+
+return isMobile 
+    ? MobileLayout()
+    : isTablet
+        ? TabletLayout()
+        : DesktopLayout();
+```
+
+**Refresh Button Pattern**:
+```dart
+ElevatedButton(
+  onPressed: loading ? null : _loadData,  // Disable while loading
+  child: const Text('Refresh'),
+)
 ```
 
 ### Service Singleton Pattern
@@ -268,7 +687,7 @@ final businessType = prefs?['business_type'];  // 'freelancer' or 'trades'
 ```
 See [lib/services/feature_personalization_service.dart](../lib/services/feature_personalization_service.dart) for bulk feature management.
 
-## Services Architecture (43 files)
+## Services Architecture (40+ files)
 
 ### Core Business Logic
 - `invoice_service.dart` - Overdue reminders, payment status tracking
@@ -364,19 +783,38 @@ final signed = await sigService.signInvoice(
 
 ### Dev Commands
 ```bash
-flutter pub get                    # Fetch deps
-flutter run -d chrome              # Run web (hot reload enabled)
-flutter analyze                    # Lint (uses analysis_options.yaml)
-dart fix --apply                   # Auto-fix formatting + issues
+# Install dependencies
+flutter pub get
+
+# Run on Chrome (web) with hot reload
+flutter run -d chrome
+
+# Hot reload only (while app running)
+r                    # Hot reload
+R                    # Full app restart
+q                    # Quit
+
+# Code quality
+flutter analyze      # Lint check (uses analysis_options.yaml)
+dart fix --apply     # Auto-fix formatting + common issues
+flutter format .     # Format all Dart files
+
+# Check for unused imports
+dart fix --apply source.unusedImports
 ```
 
 ### Build & Deploy
 ```bash
+# Clean build for web (release mode, optimized)
 flutter clean && flutter build web --release
-# Output: build/web/ (~12-15 MB, minified+tree-shaken)
+# Output: build/web/ (~12-15 MB, minified + tree-shaken)
 
-# Local test
+# Test locally
 cd build/web && python -m http.server 8000
+# Visit http://localhost:8000
+
+# With icon optimization
+flutter build web --release --tree-shake-icons
 ```
 
 ### Route Management
