@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'landing_page_animated.dart';
 import 'sign_in_page.dart';
 import 'sign_up_page.dart';
@@ -7,11 +9,20 @@ import 'forgot_password_page.dart';
 import 'dashboard_page.dart';
 import 'home_page.dart';
 
-const supabaseUrl = 'https://fppmuibvpxrkwmymszhd.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlna3ZncnZyZHBibXVueHdoa2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQyNDUyMDAsImV4cCI6MjAyMDI0NTIwMH0.LMQFPSP8JVqVdP_sKHbQWqfyV8tHzM1KI5tLQ7vPczs';
+const supabaseUrl = 'https://lxufgembtogmsvwhdvq.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs';
 
 void main() async {
+  if (kIsWeb) {
+    setUrlStrategy(PathUrlStrategy());
+  }
+  
   WidgetsFlutterBinding.ensureInitialized();
+  
+  FlutterError.onError = (FlutterErrorDetails details) {
+    print('❌ FLUTTER ERROR: ${details.exception}');
+  };
+  
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const MyApp());
 }
