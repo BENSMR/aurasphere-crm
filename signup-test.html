@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Supabase SignUp Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 640px;
+        margin: 24px auto;
+        padding: 0 12px;
+      }
+      .form-group {
+        margin: 12px 0;
+      }
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        margin-top: 12px;
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      pre {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 4px;
+        overflow-x: auto;
+        margin-top: 24px;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Supabase SignUp Test</h1>
+    <p><strong>Project:</strong> fppmuibvpxrkwmymszhd</p>
+    <p><strong>Purpose:</strong> Test email/password signup with your Supabase credentials</p>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input id="email" type="email" value="test@example.com" />
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input id="password" type="password" value="Password12345" />
+    </div>
+
+    <button id="btn">Sign Up</button>
+    <button id="clearBtn" style="background: #6c757d; margin-left: 8px;">Clear Output</button>
+
+    <h2>Response:</h2>
+    <pre id="out"></pre>
+
+    <h2>Raw Console Log:</h2>
+    <pre id="console"></pre>
+
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+      const supabaseUrl = "https://fppmuibvpxrkwmymszhd.supabase.co";
+      const anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlna3ZncnZyZHBibXVueHdoa2F4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQyNDUyMDAsImV4cCI6MjAyMDI0NTIwMH0.LMQFPSP8JVqVdP_sKHbQWqfyV8tHzM1KI5tLQ7vPczs";
+      const supabase = createClient(supabaseUrl, anonKey);
+
+      const out = document.getElementById("out");
+      const consoleEl = document.getElementById("console");
+      let consoleLogs = [];
+
+      // Intercept console.log
+      const originalLog = console.log;
+      const originalError = console.error;
+
+      console.log = function (...args) {
+        originalLog.apply(console, args);
+        consoleLogs.push("LOG: " + args.map(a => JSON.stringify(a)).join(" "));
+        updateConsoleDisplay();
+      };
+
+      console.error = function (...args) {
+        originalError.apply(console, args);
+        consoleLogs.push("ERROR: " + args.map(a => JSON.stringify(a)).join(" "));
+        updateConsoleDisplay();
+      };
+
+      function updateConsoleDisplay() {
+        consoleEl.textContent = consoleLogs.join("\n");
+      }
+
+      function log(obj) {
+        out.innerHTML = "<span class='error'>";
+        out.textContent = JSON.stringify(obj, null, 2);
+        if (obj.error) {
+          out.className = "error";
+        } else {
+          out.className = "success";
+        }
+      }
+
+      document.getElementById("btn").addEventListener("click", async () => {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+          log({ error: "Email and password are required" });
+          return;
+        }
+
+        console.log("📤 Starting signup...");
+        console.log("URL:", supabaseUrl);
+        console.log("Anon Key (first 20 chars):", anonKey.slice(0, 20) + "...");
+        console.log("Email:", email);
+
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+          });
+
+          if (error) {
+            console.error("❌ SignUp failed:", error);
+            log({
+              step: "signUp",
+              status: "error",
+              error: {
+                name: error.name,
+                message: error.message,
+                status: error.status,
+                cause: error.cause,
+              },
+              timestamp: new Date().toISOString(),
+            });
+          } else {
+            console.log("✅ SignUp successful:", data);
+            log({
+              step: "signUp",
+              status: "success",
+              data: {
+                user: data.user ? { id: data.user.id, email: data.user.email } : null,
+                session: data.session ? { access_token: data.session.access_token.slice(0, 20) + "..." } : null,
+              },
+              timestamp: new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          console.error("❌ Exception:", e);
+          log({
+            step: "signUp",
+            status: "exception",
+            error: String(e),
+            timestamp: new Date().toISOString(),
+          });
+        }
+      });
+
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        out.textContent = "";
+        consoleEl.textContent = "";
+        consoleLogs = [];
+      });
+
+      console.log("✅ Page loaded. Ready to test signup.");
+      console.log("Supabase URL: " + supabaseUrl);
+      console.log("Replace YOUR_EMAIL and YOUR_PASSWORD before clicking Sign Up.");
+    </script>
+  </body>
+</html>
