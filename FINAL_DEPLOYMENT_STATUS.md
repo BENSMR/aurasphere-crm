@@ -260,7 +260,7 @@ Total Effort: 150 minutes (2.5 hours) to live
 
 ### Requirements Checklist
 - [ ] Have 1-2 hours free (for reading + deployment)
-- [ ] Supabase account & project (lxufgembtogmsvwhdvq)
+- [ ] Supabase account & project (lxufgzembtogmsvwhdvq)
 - [ ] Flutter installed (`flutter --version`)
 - [ ] Supabase CLI installed (`supabase --version`)
 - [ ] Text editor or IDE (VS Code, etc.)

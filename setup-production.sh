@@ -17,8 +17,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_ID="lxufgembtogmsvwhdvq"
-PROJECT_URL="https://lxufgembtogmsvwhdvq.supabase.co"
+PROJECT_ID="lxufgzembtogmsvwhdvq"
+PROJECT_URL="https://lxufgzembtogmsvwhdvq.supabase.co"
 
 echo -e "${BLUE}Project URL: ${PROJECT_URL}${NC}"
 echo ""

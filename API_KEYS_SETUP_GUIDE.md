@@ -290,7 +290,7 @@ Secret Value: your_ocr_key_here
 ### Method 1: Supabase Dashboard (Recommended)
 
 1. **Go to Supabase Dashboard**: https://app.supabase.com/
-2. **Select your project**: `lxufgembtogmsvwhdvq`
+2. **Select your project**: `lxufgzembtogmsvwhdvq`
 3. **Navigate to**: Settings → Secrets
 4. **Add each secret**:
    ```

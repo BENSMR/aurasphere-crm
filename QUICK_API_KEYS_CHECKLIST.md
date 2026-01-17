@@ -70,7 +70,7 @@
 **Option A: Using Supabase Dashboard (Easiest)**
 
 1. Go to: https://app.supabase.com/
-2. Select project: `lxufgembtogmsvwhdvq`
+2. Select project: `lxufgzembtogmsvwhdvq`
 3. Settings → Secrets
 4. Click "Add secret"
 5. Enter each:

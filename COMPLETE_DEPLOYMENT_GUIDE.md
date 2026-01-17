@@ -109,7 +109,7 @@ This guide consolidates everything needed to deploy AuraSphere CRM to production
 
 ```
 1. Go to: https://app.supabase.com/
-2. Select project: lxufgembtogmsvwhdvq
+2. Select project: lxufgzembtogmsvwhdvq
 3. Left sidebar → Settings → Secrets
 4. Click "Add secret"
 5. Paste these one-by-one:

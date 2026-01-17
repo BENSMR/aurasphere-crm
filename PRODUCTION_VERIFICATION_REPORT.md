@@ -35,7 +35,7 @@
 ### **Proof of Real Database**
 ```bash
 # These are real Supabase connection strings
-URL: https://lxufgembtogmsvwhdvq.supabase.co
+URL: https://lxufgzembtogmsvwhdvq.supabase.co
 Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Service Key: (protected, not shared)
 

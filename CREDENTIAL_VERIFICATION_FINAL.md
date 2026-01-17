@@ -13,7 +13,7 @@ const supabaseUrl = 'https://lxufgzembtogmsvwhdvq.supabase.co';
 
 But when reading from **terminal/Windows command**, the same file displays:
 ```
-const supabaseUrl = 'https://lxufgembtogmsvwhdvq.supabase.co';
+const supabaseUrl = 'https://lxufgzembtogmsvwhdvq.supabase.co';
 ```
 (WITHOUT 'z': lxufge**Mbtogmsvwhdvq)
 

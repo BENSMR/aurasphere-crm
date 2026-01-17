@@ -166,7 +166,7 @@ All migration files present and verified:
 ## Supabase Configuration Checklist
 
 ### ✅ Credentials Verified
-- **Project URL**: `https://lxufgembtogmsvwhdvq.supabase.co`
+- **Project URL**: `https://lxufgzembtogmsvwhdvq.supabase.co`
 - **Anon Key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs`
 - **Status**: Active & Correct
 

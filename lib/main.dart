@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+﻿import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -9,7 +9,7 @@ import 'forgot_password_page.dart';
 import 'dashboard_page.dart';
 import 'home_page.dart';
 
-const supabaseUrl = 'https://lxufgembtogmsvwhdvq.supabase.co';
+const supabaseUrl = 'https://lxufgzembtogmsvwhdvq.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs';
 
 void main() async {
@@ -20,7 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   FlutterError.onError = (FlutterErrorDetails details) {
-    print('❌ FLUTTER ERROR: ${details.exception}');
+    print('âŒ FLUTTER ERROR: ${details.exception}');
   };
   
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);

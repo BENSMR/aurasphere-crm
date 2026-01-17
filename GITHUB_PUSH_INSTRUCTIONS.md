@@ -48,7 +48,7 @@ Go to: https://github.com/bensmr/aura-sphere
 ## 🎯 What's Different from Before?
 
 **OLD (WRONG):**
-- Project ID: `lxufgembtogmsvwhdvq` (missing 'z')
+- Project ID: `lxufgzembtogmsvwhdvq` (correct with 'z')
 
 **NEW (CORRECT):**
 - Project ID: `lxufgzembtogmsvwhdvq` (WITH 'z')

@@ -1,3 +1,0 @@
-
-const supabaseUrl = 'https://lxufgembtogmsvwhdvq.supabase.co';
-

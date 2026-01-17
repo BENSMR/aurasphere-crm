@@ -352,7 +352,7 @@ Then switch payment keys to LIVE mode
 - **Performance**: Sub-100ms load time on modern connections
 
 ### Database Details
-- **Host**: Supabase PostgreSQL (lxufgembtogmsvwhdvq.supabase.co)
+- **Host**: Supabase PostgreSQL (lxufgzembtogmsvwhdvq.supabase.co)
 - **Tables**: 21 (all created, all indexed)
 - **Backups**: Automated by Supabase (daily)
 - **RLS**: 100% coverage (all tables protected)
