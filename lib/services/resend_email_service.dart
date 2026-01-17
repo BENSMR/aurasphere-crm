@@ -14,6 +14,7 @@
 library;
 
 class ResendEmailService {
+  // ignore: unused_element
   ResendEmailService._internal() {
     throw UnsupportedError(
       'ResendEmailService is deprecated. Use email_service.dart with Edge Functions instead.',

@@ -1,6 +1,6 @@
 # AuraSphere CRM - AI Coding Agent Instructions
 
-**Last Updated**: January 15, 2026 | Flutter 3.9.2 | Supabase 2.12.0
+**Last Updated**: January 17, 2026 | Flutter 3.9.2 | Supabase 2.12.0 | 40+ Services | 30+ Pages | Multi-tenant RLS
 
 ## 🎯 Quick Start for AI Agents
 
@@ -71,6 +71,73 @@ This is a **Flutter + Supabase SaaS CRM** for tradespeople with 30+ feature page
    }
    ```
 
+## 🆕 Latest Features & Updates (January 17, 2026)
+
+### **Owner Feature Control & Audit Logging** (Migration: `20260111_add_owner_feature_control.sql`)
+Organization owners can now control team member features with full audit trail:
+
+**Owner Capabilities**:
+- **Lock features org-wide** - Disable features for compliance/security (all team members affected)
+- **Force-enable features** on specific team member devices (override user preferences)
+- **Disable specific features** on individual devices (granular control)
+- **View complete audit trail** - `feature_audit_log` table tracks all changes with performer, target, timestamp
+- **Bulk reset** - Reset all team member features to defaults with reason
+
+**New Database Schema**:
+- `organizations`: `feature_lock_enabled`, `locked_features` (JSONB), `feature_lock_reason`, `feature_lock_by`, `feature_lock_at`, `feature_unlock_at`
+- `feature_personalization`: `is_owner_enforced`, `enforced_by`, `enforced_at`, `disabled_features`, `disabled_by_owner`, `disabled_by`, `disabled_at`
+- `feature_audit_log` (NEW): Complete audit trail with RLS for owner viewing
+
+**Service Methods** (see `FeaturePersonalizationService`):
+```dart
+// Owner-only methods (all check permission first)
+await service.forceEnableAllFeaturesOnDevice(orgId, ownerUserId, deviceId, targetUserId);
+await service.disableFeaturesOnDevice(orgId, ownerUserId, deviceId, targetUserId, ['ai_agents', 'marketing']);
+await service.lockFeaturesOrgWide(orgId, ownerUserId, lockedFeatureIds, reason);
+await service.unlockFeaturesOrgWide(orgId, ownerUserId);
+await service.resetAllTeamFeaturestoDefaults(orgId, ownerUserId, reason);
+final logs = await service.getFeatureAuditLog(orgId, ownerUserId);
+final status = await service.getOwnerControlStatus(orgId, ownerUserId);
+```
+
+**Device Limits by Subscription**:
+```dart
+{
+  'solo': {'mobile_devices': 2, 'tablet_devices': 1},
+  'team': {'mobile_devices': 3, 'tablet_devices': 2},
+  'workshop': {'mobile_devices': 5, 'tablet_devices': 3},
+  'enterprise': {'mobile_devices': 10, 'tablet_devices': 5},
+}
+```
+- Mobile: 6 max features per device (user-selectable)
+- Tablet: 8 max features per device (user-selectable)
+- Device registration enforces subscription limits
+
+### **CloudGuard & Partner Portal** (Deployed January 15, 2026)
+**8 new tables** with RLS + 28 security policies:
+- `cloud_connections` - Connect AWS/Azure/GCP accounts
+- `cloud_expenses` - Track cloud infrastructure costs
+- `waste_findings` - AI-detected cost optimization opportunities
+- `partner_accounts` - Partner integrations
+- `partner_demos`, `partner_resources` - Learning materials
+- `partner_commissions` - Revenue tracking
+
+**New Pages**: `/cloudguard` (dashboard), `/partner-portal` (partner home), `/suppliers` (supplier management)
+**Routes**: All registered in `main.dart` with auth guards
+
+### **Prepayment Code System** (for 54 African countries)
+- `prepayment_codes` table: Offline payment codes (alternative to Stripe/Paddle)
+- Support regions without credit card infrastructure
+- Audit: `prepayment_code_audit` (generated, validated, redeemed, expired)
+- Service: `PrepaymentCodeService` handles validation and redemption
+
+### **Trial & Subscription Management**
+- `trial_management`: Track trial duration, expiry, feature access
+- `trial_reminders`: Auto-send 1 day left, 6 hours left, trial ended
+- `subscriptions`: Discount management with `discount_percentage`, `discount_ends_at`
+- `pricing_plans`: Define plans with feature arrays per subscription tier
+- Service: `TrialService` handles lifecycle, reminders, upsells
+
 ## Architecture Overview
 
 **AuraSphere CRM** is a Flutter web/mobile app for tradespeople to manage jobs, invoices, clients, and teams. Multi-tenant SaaS with Supabase backend, 9-language i18n, and extensive integrations (Stripe, Paddle, WhatsApp, QuickBooks, HubSpot, Slack).
@@ -86,8 +153,11 @@ This is a **Flutter + Supabase SaaS CRM** for tradespeople with 30+ feature page
 
 ### Key Directories
 - `/lib/services/` (43 files) - **ALL business logic lives here**; singleton pattern; Logger for logging; **NEVER UI code**
-  - Example files: `invoice_service.dart`, `aura_ai_service.dart`, `stripe_service.dart`, `feature_personalization_service.dart`, `digital_signature_service.dart`
-  - **Pattern**: Static final instance, private constructor, factory method, always call `.single()` or `.maybeSingle()` on Supabase queries
+  - Example files: `invoice_service.dart`, `aura_ai_service.dart`, `stripe_payment_service.dart`, `feature_personalization_service.dart`, `digital_signature_service.dart`
+  - **Pattern**: Most services use singleton with `static final _instance = ServiceName._internal()` + factory constructor
+  - **Instantiation**: Call `ServiceName()` to get singleton instance or use static methods like `AuraAiService.parseCommand()`
+  - **Important**: `stripe_service.dart` is **DEPRECATED** - use `stripe_payment_service.dart` instead (stripe_service contains invalid hardcoded keys)
+  - **Query best practice**: Always call `.single()` or `.maybeSingle()` for single-record queries to prevent silent failures
 - `/lib/` - Pages & widgets; ~30 `*_page.dart` files; each page manages only local state (loading, lists, form data)
   - Every protected page must check `currentUser == null` in both `initState` + `build` 
   - Use `setState()` with `if (mounted)` safety checks in catch/finally blocks
@@ -707,9 +777,10 @@ See [lib/services/feature_personalization_service.dart](../lib/services/feature_
 - `feature_personalization_service.dart` - Owner control for device features (mobile 6 features / tablet 8 features per subscription tier)
 
 ### Payment & Subscriptions
-- `stripe_service.dart` - Stripe checkout, invoice sync, webhook handling
-- `stripe_payment_service.dart` - Stripe payment operations (separate from checkout)
-- `paddle_service.dart`, `paddle_payment_service.dart` - Paddle integration
+- `stripe_service.dart` - **DEPRECATED** - Do not use; contains invalid hardcoded keys; use `stripe_payment_service.dart` instead
+- `stripe_payment_service.dart` - ✅ **USE THIS** - Stripe payment operations via Edge Function proxy (secure)
+- `paddle_service.dart` - **DEPRECATED** - Do not use; use `paddle_payment_service.dart` instead
+- `paddle_payment_service.dart` - ✅ **USE THIS** - Paddle integration via Edge Function proxy (secure)
 - `trial_service.dart` - Trial creation, expiry tracking, upsell logic
 - `prepayment_code_service.dart` - Prepaid code redemption (gift cards, prepayment codes)
 
@@ -1014,7 +1085,7 @@ When modifying core tables, audit impacts in:
 - `invoice_service.dart` - invoice calculations, reminders, payment status
 - `trial_service.dart` - trial expiry, plan upgrades
 - `integration_service.dart` - third-party syncs (HubSpot, QuickBooks, Slack)
-- `stripe_service.dart` / `paddle_service.dart` - subscription webhooks
+- `stripe_payment_service.dart` / `paddle_payment_service.dart` - subscription webhooks (NOT stripe_service/paddle_service which are deprecated)
 
 ## Common Patterns to Follow
 1. **Error messages**: Always include emoji + context: `print('❌ Failed to fetch invoices: $e')`

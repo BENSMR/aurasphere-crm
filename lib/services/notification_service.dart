@@ -13,6 +13,7 @@
 library;
 
 class NotificationService {
+  // ignore: unused_element
   NotificationService._internal() {
     throw UnsupportedError('NotificationService is deprecated. Use Edge Functions instead.');
   }

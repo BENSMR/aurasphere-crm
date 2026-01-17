@@ -31,6 +31,7 @@ library;
 
 // Dummy class to prevent accidental usage
 class StripeService {
+  // ignore: unused_field
   static final StripeService _instance = StripeService._internal();
   
   StripeService._internal() {

@@ -31,6 +31,7 @@ library;
 
 // Dummy class to prevent accidental usage
 class PaddleService {
+  // ignore: unused_field
   static final PaddleService _instance = PaddleService._internal();
   
   PaddleService._internal() {

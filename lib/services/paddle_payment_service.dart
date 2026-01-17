@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -64,12 +63,13 @@ class PaddlePaymentService {
         },
       );
 
-      if (response['success'] == true) {
-        final customerId = response['customer_id'] as String;
+      final responseMap = response is Map ? (response as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (responseMap['success'] == true) {
+        final customerId = responseMap['customer_id'] as String;
         _logger.i('✅ Paddle customer created: $customerId');
         return customerId;
       } else {
-        _logger.e('❌ Create customer failed: ${response['error']}');
+        _logger.e('❌ Create customer failed: ${responseMap['error']}');
         return null;
       }
     } catch (e) {
@@ -106,11 +106,12 @@ class PaddlePaymentService {
         },
       );
 
-      if (response['success'] == true) {
+      final responseMap = response is Map ? (response as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (responseMap['success'] == true) {
         _logger.i('✅ Paddle subscription created');
-        return response as Map<String, dynamic>;
+        return responseMap;
       } else {
-        _logger.e('❌ Create subscription failed: ${response['error']}');
+        _logger.e('❌ Create subscription failed: ${responseMap['error']}');
         return null;
       }
     } catch (e) {
@@ -132,11 +133,12 @@ class PaddlePaymentService {
         },
       );
 
-      if (response['success'] == true) {
+      final responseMap = response is Map ? (response as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (responseMap['success'] == true) {
         _logger.i('✅ Subscription cancelled');
         return true;
       } else {
-        _logger.e('❌ Cancel failed: ${response['error']}');
+        _logger.e('❌ Cancel failed: ${responseMap['error']}');
         return false;
       }
     } catch (e) {
@@ -162,11 +164,12 @@ class PaddlePaymentService {
         },
       );
 
-      if (response['success'] == true) {
+      final responseMap = response is Map ? (response as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (responseMap['success'] == true) {
         _logger.i('✅ Subscription updated');
         return true;
       } else {
-        _logger.e('❌ Update failed: ${response['error']}');
+        _logger.e('❌ Update failed: ${responseMap['error']}');
         return false;
       }
     } catch (e) {
@@ -188,11 +191,12 @@ class PaddlePaymentService {
         },
       );
 
-      if (response['success'] == true) {
+      final responseMap = response is Map ? (response as Map).cast<String, dynamic>() : <String, dynamic>{};
+      if (responseMap['success'] == true) {
         _logger.i('✅ Subscription retrieved');
-        return response as Map<String, dynamic>;
+        return responseMap;
       } else {
-        _logger.e('❌ Fetch failed: ${response['error']}');
+        _logger.e('❌ Fetch failed: ${responseMap['error']}');
         return null;
       }
     } catch (e) {

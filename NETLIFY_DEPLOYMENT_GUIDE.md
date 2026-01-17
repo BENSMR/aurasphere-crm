@@ -62,11 +62,11 @@ dir build\web
   SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs"
 
 [context.preview.environment]
-  SUPABASE_URL = "https://lxufgembtogmsvwhdvq.supabase.co"
+  SUPABASE_URL = "https://lxufgzembtogmsvwhdvq.supabase.co"
   SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs"
 
 [context.deploy-preview.environment]
-  SUPABASE_URL = "https://lxufgembtogmsvwhdvq.supabase.co"
+  SUPABASE_URL = "https://lxufgzembtogmsvwhdvq.supabase.co"
   SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs"
 ```
 
@@ -113,7 +113,7 @@ Click **"Site settings"** → **"Build & deploy"** → **"Environment"** → **"
 
 Add:
 ```
-SUPABASE_URL = https://lxufgembtogmsvwhdvq.supabase.co
+SUPABASE_URL = https://lxufgzembtogmsvwhdvq.supabase.co
 SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 

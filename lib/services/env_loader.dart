@@ -12,8 +12,8 @@ class EnvLoader {
   // Fallback values for web (hardcoded from Supabase project)
   static final Map<String, String> _fallbackEnv = {
     // Supabase Configuration
-    'SUPABASE_URL': 'https://fppmuibvpxrkwmymszhd.supabase.co',
-    'SUPABASE_ANON_KEY': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwcG11aWJ2cHhya3dteW1zemhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMjU1MzUsImV4cCI6MjA4MTcwMTUzNX0.Qm99GcdIdl9iBywdsjmP8Gh5SMLk3UYulwytxXTnzxA',
+    'SUPABASE_URL': 'https://lxufgzembtogmsvwhdvq.supabase.co',
+    'SUPABASE_ANON_KEY': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4dWZnemVtYnRvZ21zdndoZHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NTAxMTAsImV4cCI6MjA4NDEyNjExMH0.5Ha4bS4HeuMEqqalpPa_wCSol116rxlllR5s__kVtFs',
     
     // AI & LLM Configuration
     'GROQ_API_KEY': '', // ← Add your Groq API key here (https://console.groq.com)
